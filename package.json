@@ -45,5 +45,8 @@
     "prepublish": "gulp prepublish",
     "test": "gulp"
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "dependencies": {
+    "phantomjs-prebuilt": "^2.1.7"
+  }
 }

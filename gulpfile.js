@@ -16,7 +16,7 @@ var isparta = require('isparta');
 require('babel-core/register');
 
 gulp.task('static', function () {
-  return gulp.src('**/*.js')
+  return gulp.src('**/*.es6')
     .pipe(excludeGitignore())
     .pipe(eslint())
     .pipe(eslint.format())
@@ -53,7 +53,7 @@ gulp.task('test', ['pre-test'], function (cb) {
 });
 
 gulp.task('watch', function () {
-  gulp.watch(['lib/**/*.js', 'test/**'], ['test']);
+  gulp.watch(['lib/**/*.es6', 'test/**'], ['test']);
 });
 
 gulp.task('coveralls', ['test'], function () {
@@ -66,7 +66,7 @@ gulp.task('coveralls', ['test'], function () {
 });
 
 gulp.task('babel', ['clean'], function () {
-  return gulp.src('lib/**/*.js')
+  return gulp.src('lib/**/*.es6')
     .pipe(babel())
     .pipe(gulp.dest('dist'));
 });
