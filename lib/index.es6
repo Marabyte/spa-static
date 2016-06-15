@@ -9,40 +9,24 @@
 //   'tdk'
 // ];
 
-// console.log(binPath);
-// childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
-//   if (err){
-//       console.log(err)
-//   }
-//   if (stdout){
-//       console.log(stdout)
-//   }
-//   if (stderr){
-//       console.log(stderr)
-//   }
-// })
+const spawn = require('child_process').spawn;
 
-//export default {};
-console.log('first');
-var path = require('path')
-var childProcess = require('child_process')
-var phantomjs = require('phantomjs-prebuilt')
-var binPath = phantomjs.path
- 
-var childArgs = [
-  path.join(__dirname, 'phantomMenace.js'),
-  'http://www.traveldk.com/',
-  'tdk'
-]
- 
-childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
-  if (err){
-      console.log(err)
-  }
-  if (stdout){
-      console.log(stdout)
-  }
-  if (stderr){
-      console.log(stderr)
-  }
-})
+var path = require('path');
+var childProcess = require('child_process');
+var phantomjs = require('phantomjs-prebuilt');
+var binPath = phantomjs.path;
+
+var childArgs = [path.join(__dirname, 'phantomMenace.js'), 'http://www.traveldk.com/'];
+
+const ls = spawn(binPath, [path.join(__dirname, 'phantomMenace.js'), 'http://www.traveldk.com']);
+ls.stdout.on('data', (data) => {
+  console.log(`stdout: ${data}`);
+});
+
+ls.stderr.on('data', (data) => {
+  console.log(`stderr: ${data}`);
+});
+
+ls.on('close', (code) => {
+  console.log(`child process exited with code ${code}`);
+});
