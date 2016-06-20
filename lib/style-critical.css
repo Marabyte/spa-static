@@ -53,7 +53,13 @@ body{ margin-bottom: 557px; }
 #landing_page_view .container{ border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: rgb(204, 204, 204); text-align: center; margin-bottom: 14px; background-color: rgb(255, 255, 255); }
 #landing_page_view .container h2{ font-family: 'Myriad W08 Semibold', Helvetica, Arial, sans-serif; font-weight: 400; font-size: 1.15em; color: rgb(76, 76, 76); margin: 16px 25px 3px; }
 #landing_page_view .container .description{ font-size: 0.8em; color: rgb(128, 128, 128); line-height: 18px; font-family: 'Myriad W08 Light', Helvetica, Arial, sans-serif; font-weight: 400; margin: 0px 25px 16px; }
+#landing_page_view .container .image-container .inner{ margin: 0px 14px 2px; }
+#landing_page_view .container .image-container article{ height: 146px; width: calc(50% - 7px); display: inline-block; margin-bottom: 14px; float: left; }
+#landing_page_view .container .image-container article .article-image-outer{ height: 103px; width: 100%; display: block; overflow: hidden; }
+#landing_page_view .container .image-container article img{ width: 100%; height: auto; }
+#landing_page_view .container .image-container article:nth-child(odd){ margin-right: 14px; }
 #landing_page_view .container.sights-by-destination{ padding-bottom: 0px; height: auto; }
+#landing_page_view .container.sights-by-destination .image-container{ margin-bottom: 16px; }
 .search-container{ height: 214px; border-top-width: 1px; border-top-style: solid; border-top-color: rgb(204, 204, 204); border-bottom-width: 1px; border-bottom-style: solid; border-bottom-color: rgb(204, 204, 204); background-image: url(http://res.cloudinary.com/dk/image/upload/q_70/c_fill,h_354,w_1190/Destination/cutout/cropped.jpg); background-size: cover; background-color: rgb(255, 255, 255); background-position: 50% 50%; }
 .search-container .search-container-inner{ margin: 10px 14px; }
 .search-container .search-container-inner::after{ content: ''; display: block; clear: both; }
@@ -80,6 +86,13 @@ body{ margin-bottom: 410px; }
 #landing_page_view .search-container .search-container-inner .search-container-copy{ padding: 0px; display: block; float: none; }
 #landing_page_view .container{ margin: 0px 3.5% 20px; border-left-width: 1px; border-left-style: solid; border-left-color: rgb(204, 204, 204); border-right-width: 1px; border-right-style: solid; border-right-color: rgb(204, 204, 204); border-top-width: 1px; border-top-style: solid; border-top-color: rgb(204, 204, 204); }
 #landing_page_view .container.sights-by-destination{ height: auto; }
+#landing_page_view .container.sights-by-destination .image-container{ margin-bottom: 16px; }
+#landing_page_view .container.sights-by-destination .image-container article{ margin-bottom: 0px; width: calc(25% - 11px); height: auto; }
+#landing_page_view .container.sights-by-destination .image-container article .article-image-outer{ height: auto; }
+#landing_page_view .container.sights-by-destination .image-container article img{ height: auto; width: 100%; }
+#landing_page_view .container.sights-by-destination .image-container article:nth-child(odd){ margin-right: 0px; }
+#landing_page_view .container.sights-by-destination .image-container article:not(:last-child){ margin-right: 14px; }
+#landing_page_view .container.sights-by-destination .image-container{ margin-bottom: 0px; }
 .search-container{ border: 1px solid rgb(204, 204, 204); }
 .search-container .search-container-inner{ margin: 10px 15px; text-align: left; }
 .search-container .search-container-inner .search-container-copy{ display: inline-block; float: left; padding: 0px; }
@@ -143,6 +156,9 @@ body{ margin-bottom: 438px; }
 #landing_page_view .container{ margin-bottom: 25px; height: 312px; }
 #landing_page_view .container h2{ font-size: 1.6em; }
 #landing_page_view .container .description{ font-size: 1.05em; margin-bottom: 22px; }
+#landing_page_view .container .image-container .inner{ margin: 0px 20px 2px; }
+#landing_page_view .container.sights-by-destination .image-container article{ width: calc(25% - 15px); }
+#landing_page_view .container.sights-by-destination .image-container article:not(:last-child){ margin-right: 20px; }
 .search-container{ height: 266px; }
 .search-container .search-container-inner .search-container-copy{ left: 11px; position: relative; height: 85px; }
 .search-container .search-container-inner .search-container-copy p{ font-size: 21px; text-align: left; }
@@ -183,6 +199,9 @@ body{ margin-bottom: 302px; }
 #landing_page_view .container{ max-width: 1192px; margin: 0px auto 30px; height: 414px; }
 #landing_page_view .container h2{ font-size: 1.9em; margin-bottom: 10px; }
 #landing_page_view .container .description{ font-size: 1.4em; margin-bottom: 30px; }
+#landing_page_view .container .image-container .inner{ margin: 0px 26px 2px; }
+#landing_page_view .container.sights-by-destination .image-container article{ width: calc(25% - 20px); }
+#landing_page_view .container.sights-by-destination .image-container article:not(:last-child){ margin-right: 26px; }
 .search-container{ height: 354px; }
 .search-container .search-container-inner{ margin: 15px 30px 0px 15px; }
 .search-container .search-container-inner .search-container-copy{ height: 100px; padding: 0px; text-align: left; }

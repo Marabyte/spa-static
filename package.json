@@ -48,12 +48,12 @@
   "license": "Apache-2.0",
   "dependencies": {
     "autoprefixer": "^6.3.6",
-    "critical": "^0.7.3",
+    "cheerio": "^0.20.0",
     "criticalcss": "^1.0.1",
     "css-mqpacker": "^5.0.1",
+    "fg-loadcss": "^1.2.0",
     "html-minifier": "^2.1.4",
     "phantom": "^2.1.5",
-    "phantomjs-prebuilt": "^2.1.7",
     "postcss": "^5.0.21",
     "request": "^2.72.0"
   }
