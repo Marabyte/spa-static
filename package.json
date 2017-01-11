@@ -1,0 +1,41 @@
+{
+  "name": "spa-static",
+  "version": "0.1.0",
+  "description": "It's Spastatic! It generates static HTML pages of a website to improve page loading time and making it SEO friendly ",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-patch": "tsc && git commit -am 'BUILD : Patch update' && npm version patch",
+    "build-minor": "tsc && git commit -am 'BUILD : Minor update' && npm version minor",
+    "build-major": "tsc && git commit -am 'BUILD : Major update' && npm version major"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Marabyte/spa-static.git"
+  },
+  "keywords": [
+    "SPA",
+    "angular",
+    "react",
+    "backbone",
+    "static",
+    "generator"
+  ],
+  "author": "Hugo Nogueira",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Marabyte/spa-static/issues"
+  },
+  "homepage": "https://github.com/Marabyte/spa-static#readme",
+  "devDependencies": {
+    "@types/node": "^7.0.0",
+    "tslint": "^4.3.1",
+    "typescript": "^2.1.4"
+  },
+  "dependencies": {
+    "phantom": "^2.1.21"
+  }
+}

@@ -1,0 +1,13 @@
+version: "2"
+
+services:
+  app:
+    build: .
+    command: nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/index.ts
+    environment:
+        NODE_ENV: dev
+    ports:
+        - '9091:9091'
+    volumes:
+        - .:/usr/src/app/
+        - /usr/src/app/node_modules
