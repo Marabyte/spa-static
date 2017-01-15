@@ -8,23 +8,38 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const phantom = require("phantom");
-const urlExtractor = require("./urlExtractor");
+const urlExtractor_1 = require("./lib/urlExtractor");
 class Spastatic {
     constructor(options) {
         this.options = {
-            siteMapurl: '',
+            siteMapUrl: '',
             optimizeHtml: true
         };
         this.options = options;
     }
     static() {
         return __awaiter(this, void 0, void 0, function* () {
+            const urlExtractor = yield new urlExtractor_1.default(this.options.siteMapUrl);
+            let urlList = yield urlExtractor.getUrlList();
             const instance = yield phantom.create();
             const page = yield instance.createPage();
+            const htmlArr = [];
             yield page.on('onResourceRequested', function (requestData) {
-                console.info('Requesting', requestData.url);
+                // console.info('Requesting', requestData.url);
             });
-            return urlExtractor.getUrl(this.options.siteMapurl);
+            for (let url of urlList) {
+                const staticHtmlObj = {
+                    url: url,
+                    content: ''
+                };
+                const status = yield page.open(url);
+                //console.log(status);
+                const content = yield page.property('content');
+                staticHtmlObj.content = content;
+                htmlArr.push(staticHtmlObj);
+            }
+            yield instance.exit();
+            return htmlArr;
         });
     }
 }

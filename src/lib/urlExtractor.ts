@@ -20,13 +20,19 @@ export default class UrlExtractor {
         console.error(error);
       });
   }
-  getUrl() {
-    let url: string[] = [];
+  public getUrlList() {
+    let urlList: string[] = [];
 
     return this.getSitemap()
       .then((sitemap) => {
-        let sitemapObj = xmlParser.toJson(sitemap);
-        console.log(sitemapObj)
+        let sitemapObj = xmlParser.toJson(sitemap, { object: true });
+        let urlArray = sitemapObj.urlset.url;
+        for (let url of urlArray) {
+          if (url.loc) {
+            urlList.push(url.loc);
+          }
+        }
+        return urlList;
       });
 
   }

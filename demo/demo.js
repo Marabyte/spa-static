@@ -1,12 +1,15 @@
 const fs = require('fs');
 const spastatic = require('../dist');
-const spa = new spastatic();
 const options = {
-  siteMapUrl : '.'
+  siteMapUrl : 'http://www.traveldk.com/sitemap.xml'
 }
-spa.static(options).then(
+const spa = new spastatic(options);
+
+spa.static().then(
   (html) => {
-    //fs.writeFileSync(html.path, html.stream);
-    console.log(options);
+    console.log(html.length);
+    for (let page in html) {
+      fs.writeFileSync(page.name + '/index.html', page.content);
+    }
   }
 )
