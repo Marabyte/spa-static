@@ -18,8 +18,7 @@ export default class UrlExtractor {
   private async getSitemap() {
     try {
       if (helper.isUrl(this.url) && helper.isXml(this.url)) {
-        const sitemap = await request(this.url);
-        return sitemap;
+        return await request(this.url);
       }
     } catch (error) {
       console.error(`Error on Request Catch : ${error}`);

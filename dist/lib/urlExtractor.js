@@ -23,8 +23,7 @@ class UrlExtractor {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 if (helper.isUrl(this.url) && helper.isXml(this.url)) {
-                    const sitemap = yield request(this.url);
-                    return sitemap;
+                    return yield request(this.url);
                 }
             }
             catch (error) {

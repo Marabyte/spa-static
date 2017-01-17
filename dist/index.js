@@ -9,8 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const phantom = require("phantom");
 const urlExtractor_1 = require("./lib/urlExtractor");
+const pageOptimiser_1 = require("./lib/pageOptimiser");
 const helper_1 = require("./lib/helper");
 const helper = new helper_1.default();
+const pageOptimiser = new pageOptimiser_1.default();
 // const cores = os.cpus().length;
 class Spastatic {
     constructor(options) {
@@ -21,45 +23,49 @@ class Spastatic {
         };
         this.options = options;
     }
+    render(urlList) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const htmlArr = [];
+            const instance = yield phantom.create();
+            const page = yield instance.createPage();
+            for (let url of urlList) {
+                const staticHtmlObj = {
+                    url: url,
+                    content: ''
+                };
+                yield page.on('onResourceRequested', (requestData) => {
+                    if (/(?=.traveldk\.com)(?=.*\.css)/i.test(requestData.url)) {
+                        console.info('Requesting', requestData.url);
+                        pageOptimiser.cssMunch(requestData.url);
+                    }
+                });
+                yield page.open(url);
+                const content = yield page.property('content');
+                staticHtmlObj.content = content;
+                htmlArr.push(staticHtmlObj);
+            }
+            yield instance.exit();
+            return htmlArr;
+        });
+    }
     static() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                console.time('static');
                 const urlExtractor = yield new urlExtractor_1.default(this.options.siteMapUrl);
-                const instance = yield phantom.create();
-                const page = yield instance.createPage();
-                const htmlArr = [];
+                let urlList;
                 if (this.options.siteMapUrl && helper.isXml(this.options.siteMapUrl)) {
-                    let urlList = yield urlExtractor.getUrlList();
-                    // await page.on('onResourceRequested', function (requestData) {
-                    //   console.info('Requesting', requestData.url);
-                    // });
-                    for (let url of urlList) {
-                        const staticHtmlObj = {
-                            url: url,
-                            content: ''
-                        };
-                        const status = yield page.open(url);
-                        const content = yield page.property('content');
-                        staticHtmlObj.content = content;
-                        htmlArr.push(staticHtmlObj);
-                    }
+                    urlList = yield urlExtractor.getUrlList();
                 }
                 else if (this.options.singlePageUrl && helper.isUrl(this.options.singlePageUrl)) {
-                    const url = this.options.singlePageUrl;
-                    const staticHtmlObj = {
-                        url: url,
-                        content: ''
-                    };
-                    yield page.open(url);
-                    const content = yield page.property('content');
-                    staticHtmlObj.content = content;
-                    htmlArr.push(staticHtmlObj);
+                    urlList = [];
+                    urlList.push(this.options.singlePageUrl);
                 }
                 else {
                     throw Error('Invalid sitemap or URL');
                 }
-                yield instance.exit();
-                return htmlArr;
+                console.timeEnd('static');
+                return this.render(urlList);
             }
             catch (error) {
                 console.error(`Error in extractor: ${error}`);
