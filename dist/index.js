@@ -9,37 +9,62 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const phantom = require("phantom");
 const urlExtractor_1 = require("./lib/urlExtractor");
+const helper_1 = require("./lib/helper");
+const helper = new helper_1.default();
+// const cores = os.cpus().length;
 class Spastatic {
     constructor(options) {
         this.options = {
-            siteMapUrl: '',
+            siteMapUrl: null,
+            singlePageUrl: null,
             optimizeHtml: true
         };
         this.options = options;
     }
     static() {
         return __awaiter(this, void 0, void 0, function* () {
-            const urlExtractor = yield new urlExtractor_1.default(this.options.siteMapUrl);
-            let urlList = yield urlExtractor.getUrlList();
-            const instance = yield phantom.create();
-            const page = yield instance.createPage();
-            const htmlArr = [];
-            yield page.on('onResourceRequested', function (requestData) {
-                // console.info('Requesting', requestData.url);
-            });
-            for (let url of urlList) {
-                const staticHtmlObj = {
-                    url: url,
-                    content: ''
-                };
-                const status = yield page.open(url);
-                //console.log(status);
-                const content = yield page.property('content');
-                staticHtmlObj.content = content;
-                htmlArr.push(staticHtmlObj);
+            try {
+                const urlExtractor = yield new urlExtractor_1.default(this.options.siteMapUrl);
+                const instance = yield phantom.create();
+                const page = yield instance.createPage();
+                const htmlArr = [];
+                if (this.options.siteMapUrl && helper.isXml(this.options.siteMapUrl)) {
+                    let urlList = yield urlExtractor.getUrlList();
+                    // await page.on('onResourceRequested', function (requestData) {
+                    //   console.info('Requesting', requestData.url);
+                    // });
+                    for (let url of urlList) {
+                        const staticHtmlObj = {
+                            url: url,
+                            content: ''
+                        };
+                        const status = yield page.open(url);
+                        const content = yield page.property('content');
+                        staticHtmlObj.content = content;
+                        htmlArr.push(staticHtmlObj);
+                    }
+                }
+                else if (this.options.singlePageUrl && helper.isUrl(this.options.singlePageUrl)) {
+                    const url = this.options.singlePageUrl;
+                    const staticHtmlObj = {
+                        url: url,
+                        content: ''
+                    };
+                    yield page.open(url);
+                    const content = yield page.property('content');
+                    staticHtmlObj.content = content;
+                    htmlArr.push(staticHtmlObj);
+                }
+                else {
+                    throw Error('Invalid sitemap or URL');
+                }
+                yield instance.exit();
+                return htmlArr;
             }
-            yield instance.exit();
-            return htmlArr;
+            catch (error) {
+                console.error(`Error in extractor: ${error}`);
+                throw error;
+            }
         });
     }
 }

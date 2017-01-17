@@ -5,35 +5,45 @@
 
 import * as request from 'request-promise-native';
 import * as xmlParser from 'xml2json';
+import Helper from './helper';
+
+const helper = new Helper();
 
 export default class UrlExtractor {
   private url: string;
   constructor(url: string) {
     this.url = url;
   }
-  private getSitemap() {
-    return request(this.url)
-      .then((sitemap) => {
+
+  private async getSitemap() {
+    try {
+      if (helper.isUrl(this.url) && helper.isXml(this.url)) {
+        const sitemap = await request(this.url);
         return sitemap;
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+      }
+    } catch (error) {
+      console.error(`Error on Request Catch : ${error}`);
+      throw error;
+    }
   }
-  public getUrlList() {
+
+  public async getUrlList() {
     let urlList: string[] = [];
 
-    return this.getSitemap()
-      .then((sitemap) => {
-        let sitemapObj = xmlParser.toJson(sitemap, { object: true });
-        let urlArray = sitemapObj.urlset.url;
-        for (let url of urlArray) {
-          if (url.loc) {
-            urlList.push(url.loc);
-          }
+    try {
+      const sitemap = await this.getSitemap();
+      let sitemapObj = xmlParser.toJson(sitemap, { object: true });
+      let urlArray = sitemapObj.urlset.url;
+      for (let url of urlArray) {
+        if (url.loc) {
+          urlList.push(url.loc);
         }
-        return urlList;
-      });
+      }
+      return urlList;
+    } catch (error) {
+      console.error(`async caught an error: ${error}`);
+      throw error;
+    }
 
   }
 }

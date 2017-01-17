@@ -1,15 +1,22 @@
 const fs = require('fs');
 const spastatic = require('../dist');
 const options = {
-  siteMapUrl : 'http://www.traveldk.com/sitemap.xml'
+  singlePageUrl : 'http://www.traveldk.com/'
 }
 const spa = new spastatic(options);
 
-spa.static().then(
+spa.static()
+.then(
   (html) => {
-    console.log(html.length);
-    for (let page in html) {
-      fs.writeFileSync(page.name + '/index.html', page.content);
+    console.log(`number on urls: ${html.length}`);
+    for (let page of html) {
+      fs.writeFileSync('index.html', page.content);
     }
+  },
+  (error) => {
+    console.error(`reject on demo: ${error}`);
   }
 )
+.catch((error)=>{
+  console.error(`catch on demo: ${error}`)
+})
