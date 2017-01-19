@@ -1,8 +1,8 @@
 const fs = require('fs');
 const spastatic = require('../dist');
 const options = {
-  singlePageUrl: 'http://www.traveldks.com',
-  optimizeHtml: true,
+  singlePageUrl: 'http://www.traveldk.com',
+  optimiseHtml: true,
   domain: 'traveldk.com'
 }
 const spa = new spastatic(options);

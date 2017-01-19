@@ -12,7 +12,7 @@ export default class PageOptimiser {
   public async cssMunch(css) {
     try {
       let processors = [
-        autoprefixer({ browsers: ['last 1 version'] }),
+        autoprefixer({ browsers: ['last 2 version'] }),
         mqpacker(),
         cssnano()
       ];
@@ -25,7 +25,7 @@ export default class PageOptimiser {
   }
   public async criticalCss(cssOptions: any) {
     try {
-      const css = await request(cssOptions.url);
+      const css = await request(cssOptions.cssUrl);
       fs.writeFileSync('css.css', css);
       const promise = new Promise((resolve, reject) => {
         return criticalcss.getRules('css.css', (error, output) => {
@@ -59,8 +59,9 @@ export default class PageOptimiser {
   public async inlineCss(optimiserObj) {
     const minfyHtml = minify.minify;
     const dom = cheerio.load(optimiserObj.html);
-    let css = await this.criticalCss(optimiserObj.cssUrl);
-    let inlineStyle = `<style type="text/css"> ${css} </style>`;
+    let css = await this.criticalCss(optimiserObj);
+    let cssmini = await this.cssMunch(css);
+    let inlineStyle = `<style type="text/css"> ${cssmini} </style>`;
     let options = {
       removeAttributeQuotes: true,
       collapseWhitespace: true,
@@ -72,7 +73,6 @@ export default class PageOptimiser {
       useShortDoctype: true
     };
     dom('head').prepend(inlineStyle);
-    //dom.html();
     return minfyHtml(dom.html(), options);
   }
 }

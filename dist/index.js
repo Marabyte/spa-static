@@ -29,45 +29,50 @@ class Spastatic {
     }
     render(urlList) {
         return __awaiter(this, void 0, void 0, function* () {
-            const htmlArr = [];
-            const instance = yield phantom.create();
-            const page = yield instance.createPage();
-            let finalHtml;
-            let optimiseObj;
-            for (let url of urlList) {
-                let staticHtmlObj = {
-                    url: url,
-                    content: ''
-                };
-                if (this.options.optimiseHtml === true) {
-                    optimiseObj = {
-                        cssUrl: '',
-                        width: this.options.width,
-                        height: this.options.height,
-                        html: ''
+            try {
+                const htmlArr = [];
+                const instance = yield phantom.create();
+                const page = yield instance.createPage();
+                let finalHtml;
+                let optimiseObj;
+                for (let url of urlList) {
+                    let staticHtmlObj = {
+                        url: url,
+                        content: ''
                     };
-                    yield page.on('onResourceRequested', (requestData) => {
-                        let reg = new RegExp(`(?=.${this.options.domain})(?=.*\.css)`, 'i');
-                        if (reg.test(requestData.url)) {
-                            console.info(requestData.url);
-                            optimiseObj.cssUrl = requestData.url;
-                        }
-                    });
+                    if (this.options.optimiseHtml === true) {
+                        optimiseObj = {
+                            cssUrl: '',
+                            width: this.options.width,
+                            height: this.options.height,
+                            html: ''
+                        };
+                        yield page.on('onResourceRequested', (requestData, networkRequest) => {
+                            let reg = new RegExp(`(?=.${this.options.domain})(?=.*\.css)`, 'i');
+                            if (reg.test(requestData.url)) {
+                                optimiseObj.cssUrl = requestData.url;
+                            }
+                        });
+                    }
+                    yield page.open(url);
+                    const content = yield page.property('content');
+                    if (this.options.optimiseHtml === true) {
+                        optimiseObj.html = content;
+                        finalHtml = yield pageOptimiser.inlineCss(optimiseObj);
+                    }
+                    else {
+                        finalHtml = content;
+                    }
+                    staticHtmlObj.content = finalHtml;
+                    htmlArr.push(staticHtmlObj);
                 }
-                yield page.open(url);
-                const content = yield page.property('content');
-                if (this.options.optimiseHtml === true) {
-                    optimiseObj.html = content;
-                    finalHtml = yield pageOptimiser.inlineCss(optimiseObj);
-                }
-                else {
-                    finalHtml = content;
-                }
-                staticHtmlObj.content = finalHtml;
-                htmlArr.push(staticHtmlObj);
+                yield instance.exit();
+                return htmlArr;
             }
-            yield instance.exit();
-            return htmlArr;
+            catch (error) {
+                console.error(`Error: ${error}`);
+                throw new Error(error);
+            }
         });
     }
     static() {

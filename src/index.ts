@@ -22,49 +22,54 @@ class Spastatic {
     this.options = options;
   }
   private async render(urlList: string[]) {
-    const htmlArr: any[] = [];
-    const instance = await phantom.create();
-    const page = await instance.createPage();
-    let finalHtml;
-    let optimiseObj: any;
+    try {
+      const htmlArr: any[] = [];
+      const instance = await phantom.create();
+      const page = await instance.createPage();
+      let finalHtml;
+      let optimiseObj: any;
 
-    for (let url of urlList) {
-      let staticHtmlObj: any = {
-        url: url,
-        content: ''
-      };
-      if (this.options.optimiseHtml === true) {
-        optimiseObj = {
-          cssUrl: <string>'',
-          width: <number>this.options.width,
-          height: <number>this.options.height,
-          html: <string>''
+      for (let url of urlList) {
+        let staticHtmlObj: any = {
+          url: url,
+          content: ''
         };
-        await page.on('onResourceRequested', (requestData) => {
-          let reg = new RegExp(`(?=.${this.options.domain})(?=.*\.css)`, 'i');
-          if (reg.test(requestData.url)) {
-            console.info(requestData.url);
-            optimiseObj.cssUrl = requestData.url;
-          }
-        });
+        if (this.options.optimiseHtml === true) {
+          optimiseObj = {
+            cssUrl: <string>'',
+            width: <number>this.options.width,
+            height: <number>this.options.height,
+            html: <string>''
+          };
+          await page.on('onResourceRequested', (requestData, networkRequest) => {
+            let reg = new RegExp(`(?=.${this.options.domain})(?=.*\.css)`, 'i');
+            if (reg.test(requestData.url)) {
+              optimiseObj.cssUrl = requestData.url;
+            }
+          });
+        }
+
+        await page.open(url);
+        const content = await page.property('content');
+
+        if (this.options.optimiseHtml === true) {
+          optimiseObj.html = content;
+          finalHtml = await pageOptimiser.inlineCss(optimiseObj);
+        } else {
+          finalHtml = content;
+        }
+
+        staticHtmlObj.content = finalHtml;
+        htmlArr.push(staticHtmlObj);
       }
 
-      await page.open(url);
-      const content = await page.property('content');
-
-      if (this.options.optimiseHtml === true) {
-        optimiseObj.html = content;
-        finalHtml = await pageOptimiser.inlineCss(optimiseObj);
-      } else {
-        finalHtml = content;
-      }
-
-      staticHtmlObj.content = finalHtml;
-      htmlArr.push(staticHtmlObj);
+      await instance.exit();
+      return htmlArr;
+    } catch (error) {
+      console.error(`Error: ${error}`);
+      throw new Error(error);
     }
 
-    await instance.exit();
-    return htmlArr;
   }
   public async static() {
     try {
