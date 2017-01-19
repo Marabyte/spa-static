@@ -8,25 +8,89 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const autoprefixer = require("autoprefixer");
+const cheerio = require("cheerio");
+const criticalcss = require("criticalcss");
+const cssnano = require("cssnano");
+const minify = require("html-minifier");
 const mqpacker = require("css-mqpacker");
 const postcss = require("postcss");
 const request = require("request-promise-native");
 const fs = require("fs");
 class PageOptimiser {
-    cssMunch(url) {
+    cssMunch(css) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const css = yield request(url);
                 let processors = [
                     autoprefixer({ browsers: ['last 1 version'] }),
-                    mqpacker()
+                    mqpacker(),
+                    cssnano()
                 ];
-                let processed = postcss(processors).process(css);
-                fs.writeFileSync('processed.css', processed);
+                let processed = yield postcss(processors).process(css);
                 return processed;
             }
             catch (error) {
+                console.error(error);
+                throw new Error(error);
             }
+        });
+    }
+    criticalCss(cssOptions) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const css = yield request(cssOptions.url);
+                fs.writeFileSync('css.css', css);
+                const promise = new Promise((resolve, reject) => {
+                    return criticalcss.getRules('css.css', (error, output) => {
+                        let options = {
+                            rules: JSON.parse(output),
+                            ignoreConsole: true,
+                            width: cssOptions.width,
+                            height: cssOptions.height
+                        };
+                        if (error) {
+                            console.error(error);
+                            reject(error);
+                        }
+                        else {
+                            criticalcss.findCritical('http://www.traveldk.com', options, (error, output) => {
+                                fs.unlinkSync('css.css');
+                                if (error) {
+                                    reject(error);
+                                }
+                                else {
+                                    resolve(output);
+                                }
+                            });
+                        }
+                    });
+                });
+                return promise;
+            }
+            catch (error) {
+                console.error(error);
+                throw new Error(error);
+            }
+        });
+    }
+    inlineCss(optimiserObj) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const minfyHtml = minify.minify;
+            const dom = cheerio.load(optimiserObj.html);
+            let css = yield this.criticalCss(optimiserObj.cssUrl);
+            let inlineStyle = `<style type="text/css"> ${css} </style>`;
+            let options = {
+                removeAttributeQuotes: true,
+                collapseWhitespace: true,
+                conservativeCollapse: true,
+                minifyJS: true,
+                minifyCSS: false,
+                removeComments: true,
+                sortAttributes: true,
+                useShortDoctype: true
+            };
+            dom('head').prepend(inlineStyle);
+            //dom.html();
+            return minfyHtml(dom.html(), options);
         });
     }
 }

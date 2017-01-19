@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const phantom = require("phantom");
+// import * as os from 'os';
 const urlExtractor_1 = require("./lib/urlExtractor");
 const pageOptimiser_1 = require("./lib/pageOptimiser");
 const helper_1 = require("./lib/helper");
@@ -19,7 +20,10 @@ class Spastatic {
         this.options = {
             siteMapUrl: null,
             singlePageUrl: null,
-            optimizeHtml: true
+            optimiseHtml: false,
+            domain: null,
+            width: 375,
+            height: 667
         };
         this.options = options;
     }
@@ -28,20 +32,38 @@ class Spastatic {
             const htmlArr = [];
             const instance = yield phantom.create();
             const page = yield instance.createPage();
+            let finalHtml;
+            let optimiseObj;
             for (let url of urlList) {
-                const staticHtmlObj = {
+                let staticHtmlObj = {
                     url: url,
                     content: ''
                 };
-                yield page.on('onResourceRequested', (requestData) => {
-                    if (/(?=.traveldk\.com)(?=.*\.css)/i.test(requestData.url)) {
-                        console.info('Requesting', requestData.url);
-                        pageOptimiser.cssMunch(requestData.url);
-                    }
-                });
+                if (this.options.optimiseHtml === true) {
+                    optimiseObj = {
+                        cssUrl: '',
+                        width: this.options.width,
+                        height: this.options.height,
+                        html: ''
+                    };
+                    yield page.on('onResourceRequested', (requestData) => {
+                        let reg = new RegExp(`(?=.${this.options.domain})(?=.*\.css)`, 'i');
+                        if (reg.test(requestData.url)) {
+                            console.info(requestData.url);
+                            optimiseObj.cssUrl = requestData.url;
+                        }
+                    });
+                }
                 yield page.open(url);
                 const content = yield page.property('content');
-                staticHtmlObj.content = content;
+                if (this.options.optimiseHtml === true) {
+                    optimiseObj.html = content;
+                    finalHtml = yield pageOptimiser.inlineCss(optimiseObj);
+                }
+                else {
+                    finalHtml = content;
+                }
+                staticHtmlObj.content = finalHtml;
                 htmlArr.push(staticHtmlObj);
             }
             yield instance.exit();
@@ -51,7 +73,6 @@ class Spastatic {
     static() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.time('static');
                 const urlExtractor = yield new urlExtractor_1.default(this.options.siteMapUrl);
                 let urlList;
                 if (this.options.siteMapUrl && helper.isXml(this.options.siteMapUrl)) {
@@ -62,14 +83,13 @@ class Spastatic {
                     urlList.push(this.options.singlePageUrl);
                 }
                 else {
-                    throw Error('Invalid sitemap or URL');
+                    throw new Error('Invalid sitemap or URL');
                 }
-                console.timeEnd('static');
                 return this.render(urlList);
             }
             catch (error) {
                 console.error(`Error in extractor: ${error}`);
-                throw error;
+                throw new Error(error);
             }
         });
     }

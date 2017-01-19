@@ -1,5 +1,5 @@
 import * as phantom from 'phantom';
-import * as os from 'os';
+// import * as os from 'os';
 import UrlExtractor from './lib/urlExtractor';
 import PageOptimiser from './lib/pageOptimiser';
 import Helper from './lib/helper';
@@ -13,7 +13,10 @@ class Spastatic {
   options: any = {
     siteMapUrl: <string>null,
     singlePageUrl: <string>null,
-    optimizeHtml: <boolean>true
+    optimiseHtml: <boolean>false,
+    domain: <string>null,
+    width: <number>375,
+    height: <number>667
   };
   constructor(options) {
     this.options = options;
@@ -22,23 +25,41 @@ class Spastatic {
     const htmlArr: any[] = [];
     const instance = await phantom.create();
     const page = await instance.createPage();
+    let finalHtml;
+    let optimiseObj: any;
 
     for (let url of urlList) {
-      const staticHtmlObj: any = {
+      let staticHtmlObj: any = {
         url: url,
         content: ''
       };
-      await page.on('onResourceRequested', (requestData) => {
-        if (/(?=.traveldk\.com)(?=.*\.css)/i.test(requestData.url)) {
-          console.info('Requesting', requestData.url);
-          pageOptimiser.cssMunch(requestData.url);
-        }
-      });
+      if (this.options.optimiseHtml === true) {
+        optimiseObj = {
+          cssUrl: <string>'',
+          width: <number>this.options.width,
+          height: <number>this.options.height,
+          html: <string>''
+        };
+        await page.on('onResourceRequested', (requestData) => {
+          let reg = new RegExp(`(?=.${this.options.domain})(?=.*\.css)`, 'i');
+          if (reg.test(requestData.url)) {
+            console.info(requestData.url);
+            optimiseObj.cssUrl = requestData.url;
+          }
+        });
+      }
 
       await page.open(url);
       const content = await page.property('content');
 
-      staticHtmlObj.content = content;
+      if (this.options.optimiseHtml === true) {
+        optimiseObj.html = content;
+        finalHtml = await pageOptimiser.inlineCss(optimiseObj);
+      } else {
+        finalHtml = content;
+      }
+
+      staticHtmlObj.content = finalHtml;
       htmlArr.push(staticHtmlObj);
     }
 
@@ -47,7 +68,6 @@ class Spastatic {
   }
   public async static() {
     try {
-      console.time('static');
       const urlExtractor = await new UrlExtractor(this.options.siteMapUrl);
       let urlList;
       if (this.options.siteMapUrl && helper.isXml(this.options.siteMapUrl)) {
@@ -56,13 +76,12 @@ class Spastatic {
         urlList = [];
         urlList.push(this.options.singlePageUrl);
       } else {
-        throw Error('Invalid sitemap or URL');
+        throw new Error('Invalid sitemap or URL');
       }
-      console.timeEnd('static');
       return this.render(urlList);
     } catch (error) {
       console.error(`Error in extractor: ${error}`);
-      throw error;
+      throw new Error(error);
     }
   }
 }

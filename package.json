@@ -4,7 +4,7 @@
   "description": "It's Spastatic! It generates static HTML pages of a website to improve page loading time and making it SEO friendly ",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jasmine",
     "build-patch": "tsc && git commit -am 'BUILD : Patch update' && npm version patch",
     "build-minor": "tsc && git commit -am 'BUILD : Minor update' && npm version minor",
     "build-major": "tsc && git commit -am 'BUILD : Major update' && npm version major"
@@ -31,14 +31,19 @@
   },
   "homepage": "https://github.com/Marabyte/spa-static#readme",
   "devDependencies": {
+    "@types/jasmine-node": "^1.14.30",
     "@types/node": "^7.0.0",
+    "jasmine": "^2.5.3",
     "tslint": "^4.3.1",
     "typescript": "^2.1.5"
   },
   "dependencies": {
     "autoprefixer": "^6.6.1",
+    "cheerio": "^0.22.0",
     "criticalcss": "^2.1.0",
     "css-mqpacker": "^5.0.1",
+    "cssnano": "^3.10.0",
+    "html-minifier": "^3.2.3",
     "phantom": "^2.1.21",
     "postcss": "5.2.9",
     "request": "^2.79.0",

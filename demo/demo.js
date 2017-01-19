@@ -1,22 +1,26 @@
 const fs = require('fs');
 const spastatic = require('../dist');
 const options = {
-  singlePageUrl : 'http://www.traveldk.com/'
+  singlePageUrl: 'http://www.traveldks.com',
+  optimizeHtml: true,
+  domain: 'traveldk.com'
 }
 const spa = new spastatic(options);
-
+console.time('static');
 spa.static()
-.then(
+  .then(
   (html) => {
     console.log(`number on urls: ${html.length}`);
     for (let page of html) {
       fs.writeFileSync('index.html', page.content);
     }
+    console.timeEnd('static');
+
   },
   (error) => {
     console.error(`reject on demo: ${error}`);
   }
-)
-.catch((error)=>{
-  console.error(`catch on demo: ${error}`)
-})
+  )
+  .catch((error) => {
+    console.error(`catch on demo: ${error}`)
+  })
