@@ -67,7 +67,7 @@ export default class PageOptimiser {
       collapseWhitespace: true,
       conservativeCollapse: true,
       minifyJS: true,
-      minifyCSS: false,
+      minifyCSS: true,
       removeComments: true,
       sortAttributes: true,
       useShortDoctype: true

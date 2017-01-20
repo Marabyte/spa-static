@@ -1,0 +1,13 @@
+.vscode/
+demo/
+node_modules/
+spec/
+src/
+.editorconfig
+.gitignore
+docker-compose.yml
+Dockerfile
+.travis.yml
+tsconfig.json
+tslint.json
+**/*[sS]pec.js

@@ -1,7 +1,7 @@
 {
-  "name": "spa-static",
-  "version": "0.1.0",
-  "description": "It's Spastatic! It generates static HTML pages of a website to improve page loading time and making it SEO friendly ",
+  "name": "spastatic",
+  "version": "1.0.0",
+  "description": "It's Spastatic! It generates static HTML pages of a website to improve page loading time and making it SEO friendly",
   "main": "dist/index.js",
   "scripts": {
     "test": "jasmine",
@@ -10,11 +10,11 @@
     "build-major": "tsc && git commit -am 'BUILD : Major update' && npm version major"
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=6.5.0"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Marabyte/spa-static.git"
+    "url": "git+https://github.com/Marabyte/spastatic.git"
   },
   "keywords": [
     "SPA",
