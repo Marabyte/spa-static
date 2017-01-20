@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Marabyte/spastatic.svg?branch=master)](https://travis-ci.org/Marabyte/spastatic)
+
 # Spastatic
 It's Spastatic! A Nodejs module to generate static HTML pages of a website to improve page loading time and making it SEO friendly.
 

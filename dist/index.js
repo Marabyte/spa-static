@@ -31,11 +31,12 @@ class Spastatic {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const htmlArr = [];
-                const instance = yield phantom.create();
+                const instance = yield phantom.create(['--ignore-ssl-errors=no'], { logLevel: 'error' });
                 const page = yield instance.createPage();
                 let finalHtml;
                 let optimiseObj;
                 for (let url of urlList) {
+                    console.info(`Processing: ${url}`);
                     let staticHtmlObj = {
                         url: url,
                         content: ''
@@ -52,6 +53,9 @@ class Spastatic {
                             if (reg.test(requestData.url)) {
                                 optimiseObj.cssUrl = requestData.url;
                             }
+                        });
+                        yield page.on('onError', (error) => {
+                            console.log(error);
                         });
                     }
                     yield page.open(url);

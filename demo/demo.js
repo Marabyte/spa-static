@@ -1,9 +1,9 @@
 const fs = require('fs');
 const spastatic = require('../dist');
 const options = {
-  singlePageUrl: 'http://www.traveldk.com',
-  optimiseHtml: true,
-  domain: 'traveldk.com'
+  siteMapUrl: 'https://www.dkefe.com/sitemap.xml',
+  optimiseHtml: false,
+  domain: 'dkefe.com'
 }
 const spa = new spastatic(options);
 console.time('static');
@@ -12,7 +12,9 @@ spa.static()
   (html) => {
     console.log(`number on urls: ${html.length}`);
     for (let page of html) {
-      fs.writeFileSync('index.html', page.content);
+      let location = page.url.replace(/^.*\/\/[^\/]+/,'');
+      console.log(`Saving: ${location}index.html`);
+      fs.writeFileSync('demo/efe' + location + 'index.html', page.content);
     }
     console.timeEnd('static');
 

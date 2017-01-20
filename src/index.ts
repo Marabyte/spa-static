@@ -24,12 +24,13 @@ class Spastatic {
   private async render(urlList: string[]) {
     try {
       const htmlArr: any[] = [];
-      const instance = await phantom.create();
+      const instance = await phantom.create(['--ignore-ssl-errors=no'], {logLevel: 'error'});
       const page = await instance.createPage();
       let finalHtml;
       let optimiseObj: any;
 
       for (let url of urlList) {
+        console.info(`Processing: ${url}`)
         let staticHtmlObj: any = {
           url: url,
           content: ''
@@ -47,6 +48,11 @@ class Spastatic {
               optimiseObj.cssUrl = requestData.url;
             }
           });
+
+          await page.on('onError', (error) => {
+            console.log(error);
+          });
+
         }
 
         await page.open(url);
