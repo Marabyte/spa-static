@@ -16,11 +16,7 @@ spa.static()
     }
     console.timeEnd('static');
 
-  },
-  (error) => {
-    console.error(`reject on demo: ${error}`);
-  }
-  )
+  })
   .catch((error) => {
     console.error(`catch on demo: ${error}`)
   })

@@ -1,5 +1,5 @@
 # Spastatic
-It's Spastatic! A Nodejs module to to generate static HTML pages of a website to improve page loading time and making it SEO friendly.
+It's Spastatic! A Nodejs module to generate static HTML pages of a website to improve page loading time and making it SEO friendly.
 
 ## Getting Started
 `npm install spastatic --save`
@@ -19,7 +19,7 @@ let options = {
     width: <number>375,
     height: <number>667
 };
-const const spa = new spastatic(options)
+const spa = new spastatic(options)
 
 spa.static().then((html) =>{
   // Do Awesome Stuff
@@ -67,7 +67,7 @@ If set to `true` it will optimise the HTML by :
 * removing comments  
 * inlining critical CSS
 
-In a future release this will be controlable in the options.
+In a future release this will be controllable in the options.
 
 
 #### options.domain

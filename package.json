@@ -27,9 +27,9 @@
   "author": "Hugo Nogueira",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Marabyte/spa-static/issues"
+    "url": "https://github.com/Marabyte/spastatic/issues"
   },
-  "homepage": "https://github.com/Marabyte/spa-static#readme",
+  "homepage": "https://github.com/Marabyte/spastatic#readme",
   "devDependencies": {
     "@types/jasmine-node": "^1.14.30",
     "@types/node": "^7.0.0",
