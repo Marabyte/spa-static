@@ -14,12 +14,12 @@ Node v6.9.0 (LTS)
 ```
 const spastatic = require('spastatic');
 let options = {
-    siteMapUrl: <string>null,
-    singlePageUrl: <string>null,
-    optimiseHtml: <boolean>false,
-    domain: <string>null,
-    width: <number>375,
-    height: <number>667
+    siteMapUrl: null,
+    singlePageUrl: null,
+    optimiseHtml: false,
+    domain: null,
+    width: 375,
+    height: 667
 };
 const spa = new spastatic(options)
 
