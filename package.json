@@ -44,6 +44,7 @@
     "css-mqpacker": "^5.0.1",
     "cssnano": "^3.10.0",
     "html-minifier": "^3.2.3",
+    "mkpath": "^1.0.0",
     "phantom": "^2.1.21",
     "postcss": "5.2.9",
     "request": "^2.79.0",

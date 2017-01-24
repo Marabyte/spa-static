@@ -37,6 +37,7 @@ class PageOptimiser {
     criticalCss(cssOptions) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log(cssOptions.cssUrl);
                 const css = yield request(cssOptions.cssUrl);
                 fs.writeFileSync('css.css', css);
                 const promise = new Promise((resolve, reject) => {
@@ -52,7 +53,7 @@ class PageOptimiser {
                             reject(error);
                         }
                         else {
-                            criticalcss.findCritical('http://www.traveldk.com', options, (error, output) => {
+                            criticalcss.findCritical(cssOptions.pageUrl, options, (error, output) => {
                                 fs.unlinkSync('css.css');
                                 if (error) {
                                     reject(error);
@@ -67,30 +68,53 @@ class PageOptimiser {
                 return promise;
             }
             catch (error) {
-                console.error(error);
+                console.error(`Error in criticalCss: ${error}`);
                 throw new Error(error);
             }
         });
     }
-    inlineCss(optimiserObj) {
+    inlineCSS(optimiserObj) {
         return __awaiter(this, void 0, void 0, function* () {
-            const minfyHtml = minify.minify;
-            const dom = cheerio.load(optimiserObj.html);
             let css = yield this.criticalCss(optimiserObj);
             let cssmini = yield this.cssMunch(css);
             let inlineStyle = `<style type="text/css"> ${cssmini} </style>`;
-            let options = {
-                removeAttributeQuotes: true,
-                collapseWhitespace: true,
-                conservativeCollapse: true,
-                minifyJS: true,
-                minifyCSS: true,
-                removeComments: true,
-                sortAttributes: true,
-                useShortDoctype: true
+            return inlineStyle;
+        });
+    }
+    optimiseHtml(optimiserObj) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let minyObj = {
+                html: '',
+                error: false,
+                url: optimiserObj.pageUrl
             };
-            dom('head').prepend(inlineStyle);
-            return minfyHtml(dom.html(), options);
+            try {
+                const minfyHtml = minify.minify;
+                const dom = cheerio.load(optimiserObj.html);
+                let options = optimiserObj.optimiseHtmloptions;
+                minyObj.html = minfyHtml(dom.html(), options);
+                return minyObj;
+            }
+            catch (error) {
+                console.error(`Error optimising HTML: ${error}`);
+                minyObj.html = optimiserObj.html;
+                minyObj.error = true;
+                return minyObj;
+            }
+        });
+    }
+    optimise(optimiserObj) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const dom = cheerio.load(optimiserObj.html);
+            let html;
+            if (optimiserObj.inlineCss) {
+                let inlineStyle = yield this.inlineCSS(optimiserObj);
+                dom('head').prepend(inlineStyle);
+                html = dom.html();
+            }
+            if (optimiserObj.optimiseHtml) {
+                return yield this.optimiseHtml(optimiserObj);
+            }
         });
     }
 }

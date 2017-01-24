@@ -8,45 +8,61 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const phantom = require("phantom");
-// import * as os from 'os';
+const os = require("os");
 const urlExtractor_1 = require("./lib/urlExtractor");
 const pageOptimiser_1 = require("./lib/pageOptimiser");
 const helper_1 = require("./lib/helper");
+const fs = require("fs");
+const mkpath = require("mkpath");
 const helper = new helper_1.default();
 const pageOptimiser = new pageOptimiser_1.default();
-// const cores = os.cpus().length;
 class Spastatic {
     constructor(options) {
         this.options = {
             siteMapUrl: null,
             singlePageUrl: null,
             optimiseHtml: false,
-            domain: null,
+            optimiseHtmlOptions: null,
+            domain: 'mywebsite.com',
+            inlineCss: false,
             width: 375,
             height: 667
         };
         this.options = options;
     }
-    render(urlList) {
+    initPhantom(urlList) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cpuCount = os.cpus().length;
+            for (let i = 0; i < cpuCount; i++) {
+                let instance = yield phantom.create(['--ignore-ssl-errors=no'], { logLevel: 'error' });
+                let start = i * (Math.floor(urlList.length / cpuCount));
+                let end = (i + 1) * (Math.floor(urlList.length / cpuCount));
+                this.render(urlList, start, end, instance);
+            }
+        });
+    }
+    render(urlList, start, end, instance) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const htmlArr = [];
-                const instance = yield phantom.create(['--ignore-ssl-errors=no'], { logLevel: 'error' });
-                const page = yield instance.createPage();
+                let htmlArr = {
+                    urlOk: 0,
+                    urlFail: 0,
+                    urlFailList: []
+                };
                 let finalHtml;
                 let optimiseObj;
-                for (let url of urlList) {
-                    console.info(`Processing: ${url}`);
-                    let staticHtmlObj = {
-                        url: url,
-                        content: ''
-                    };
+                for (start; start < end; start++) {
+                    const page = yield instance.createPage();
+                    console.info(`Processing: ${urlList[start]} on instance ${instance.process.pid}`);
                     if (this.options.optimiseHtml === true) {
                         optimiseObj = {
                             cssUrl: '',
                             width: this.options.width,
                             height: this.options.height,
-                            html: ''
+                            html: '',
+                            pageUrl: urlList[start],
+                            optimiseHtml: this.options.optimiseHtml,
+                            optimiseHtmlOptions: this.options.optimiseHtmlOptions
                         };
                         yield page.on('onResourceRequested', (requestData, networkRequest) => {
                             let reg = new RegExp(`(?=.${this.options.domain})(?=.*\.css)`, 'i');
@@ -55,22 +71,33 @@ class Spastatic {
                             }
                         });
                         yield page.on('onError', (error) => {
-                            console.log(error);
+                            console.error(error);
                         });
                     }
-                    yield page.open(url);
+                    yield page.open(urlList[start]);
                     const content = yield page.property('content');
                     if (this.options.optimiseHtml === true) {
                         optimiseObj.html = content;
-                        finalHtml = yield pageOptimiser.inlineCss(optimiseObj);
+                        finalHtml = yield pageOptimiser.optimise(optimiseObj);
                     }
                     else {
-                        finalHtml = content;
+                        finalHtml.html = content;
                     }
-                    staticHtmlObj.content = finalHtml;
-                    htmlArr.push(staticHtmlObj);
+                    if (finalHtml.error) {
+                        htmlArr.urlFail = htmlArr.urlFail + 1;
+                        htmlArr.urlFailList.push(finalHtml.url);
+                    }
+                    else {
+                        htmlArr.urlOk = htmlArr.urlOk + 1;
+                    }
+                    let location = urlList[start].replace(/^.*\/\/[^\/]+/, '');
+                    console.log(`Saving: static/${this.options.domain}${location}index.html`);
+                    if (!location.length) {
+                        location = '/';
+                    }
+                    mkpath.sync('static/' + this.options.domain + location, '0700');
+                    fs.writeFileSync('static/' + this.options.domain + location + 'index.html', finalHtml.html);
                 }
-                yield instance.exit();
                 return htmlArr;
             }
             catch (error) {
@@ -94,7 +121,7 @@ class Spastatic {
                 else {
                     throw new Error('Invalid sitemap or URL');
                 }
-                return this.render(urlList);
+                this.initPhantom(urlList);
             }
             catch (error) {
                 console.error(`Error in extractor: ${error}`);

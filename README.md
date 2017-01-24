@@ -37,7 +37,9 @@ spa.static().then((html) =>{
 * `siteMapUrl`: '';
 * `singlePageUrl`: '';
 * `optimiseHtml`: false;
-* `domain`: '';
+* `optimiseHtmlOptions`: object
+* `inlineCss`: false
+* `domain`: 'mywebsite.com';
 * `width`:  375;
 * `height`: 667;
 
@@ -61,22 +63,30 @@ URL to a specific page, ie: `'http://www.mywebsite.com/about-us'`
 Type: `boolean`  
 Default value: `false` 
 
-If set to `true` it will optimise the HTML by : 
-* removing quotes from attributes,
-* removing whitespace,
-* minifying inline css and js,
-* sorting attributes,
-* removing comments  
-* inlining critical CSS
 
-In a future release this will be controllable in the options.
+#### options.optimiseHtmlOptions
+Type: `object`  
+Default value: 
+
+```
+{
+  removeAttributeQuotes: true,
+  collapseWhitespace: true,
+  conservativeCollapse: true,
+  minifyJS: true,
+  minifyCSS: true,
+  removeComments: true,
+  sortAttributes: true,
+  useShortDoctype: true
+}
+```
 
 
 #### options.domain
 Type: `string`  
-Default value: `''`  
+Default value: `'mywebsite.com'`  
 
-If `options.optimiseHtml` is set to `true` then this field is **REQUIRED**, ie: `'mywebsite.com'`
+This field is **REQUIRED**
 
 
 #### options.width

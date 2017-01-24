@@ -9,7 +9,7 @@ import * as request from 'request-promise-native';
 import * as fs from 'fs';
 
 export default class PageOptimiser {
-  public async cssMunch(css) {
+  private async cssMunch(css) {
     try {
       let processors = [
         autoprefixer({ browsers: ['last 2 version'] }),
@@ -23,8 +23,9 @@ export default class PageOptimiser {
       throw new Error(error);
     }
   }
-  public async criticalCss(cssOptions: any) {
+  private async criticalCss(cssOptions: any) {
     try {
+      console.log(cssOptions.cssUrl);
       const css = await request(cssOptions.cssUrl);
       fs.writeFileSync('css.css', css);
       const promise = new Promise((resolve, reject) => {
@@ -39,7 +40,7 @@ export default class PageOptimiser {
             console.error(error);
             reject(error);
           } else {
-            criticalcss.findCritical('http://www.traveldk.com', options, (error, output) => {
+            criticalcss.findCritical(cssOptions.pageUrl, options, (error, output) => {
               fs.unlinkSync('css.css');
               if (error) {
                 reject(error);
@@ -52,27 +53,45 @@ export default class PageOptimiser {
       });
       return promise;
     } catch (error) {
-      console.error(error);
+      console.error(`Error in criticalCss: ${error}`);
       throw new Error(error);
     }
   }
-  public async inlineCss(optimiserObj) {
-    const minfyHtml = minify.minify;
-    const dom = cheerio.load(optimiserObj.html);
+  private async inlineCSS(optimiserObj) {
     let css = await this.criticalCss(optimiserObj);
     let cssmini = await this.cssMunch(css);
     let inlineStyle = `<style type="text/css"> ${cssmini} </style>`;
-    let options = {
-      removeAttributeQuotes: true,
-      collapseWhitespace: true,
-      conservativeCollapse: true,
-      minifyJS: true,
-      minifyCSS: true,
-      removeComments: true,
-      sortAttributes: true,
-      useShortDoctype: true
+    return inlineStyle;
+  }
+  private async optimiseHtml(optimiserObj) {
+    let minyObj = {
+      html: <string>'',
+      error: <boolean>false,
+      url: optimiserObj.pageUrl
     };
-    dom('head').prepend(inlineStyle);
-    return minfyHtml(dom.html(), options);
+    try {
+      const minfyHtml = minify.minify;
+      const dom = cheerio.load(optimiserObj.html);
+      let options = optimiserObj.optimiseHtmloptions;
+      minyObj.html = minfyHtml(dom.html(), options);
+      return minyObj;
+    } catch (error) {
+      console.error(`Error optimising HTML: ${error}`);
+      minyObj.html = optimiserObj.html;
+      minyObj.error = true;
+      return minyObj;
+    }
+  }
+  public async optimise(optimiserObj) {
+    const dom = cheerio.load(optimiserObj.html);
+    let html;
+    if (optimiserObj.inlineCss) {
+      let inlineStyle = await this.inlineCSS(optimiserObj);
+      dom('head').prepend(inlineStyle);
+      html = dom.html();
+    }
+    if (optimiserObj.optimiseHtml) {
+      return await this.optimiseHtml(optimiserObj);
+    }
   }
 }
