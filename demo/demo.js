@@ -4,7 +4,7 @@ const options = {
   // siteMapUrl: 'http://www.dkfindout.com/sitemap.xml',
   singlePageUrl: 'http://www.dkfindout.com/us/space/solar-system/uranus/',
   optimiseHtml: true,
-  optimiseHtmloptions: {
+  optimiseHtmlOptions: {
     removeAttributeQuotes: true,
     collapseWhitespace: true,
     conservativeCollapse: true,

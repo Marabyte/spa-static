@@ -72,7 +72,7 @@ export default class PageOptimiser {
     try {
       const minfyHtml = minify.minify;
       const dom = cheerio.load(optimiserObj.html);
-      let options = optimiserObj.optimiseHtmloptions;
+      let options = optimiserObj.optimiseHtmlOptions;
       minyObj.html = minfyHtml(dom.html(), options);
       return minyObj;
     } catch (error) {

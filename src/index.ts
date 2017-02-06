@@ -47,22 +47,21 @@ class Spastatic {
         urlFailList: <any>[]
       };
       let finalHtml;
-      let optimiseObj: any;
+      let optimiseObj = {
+        cssUrl: <string>'',
+        width: <number>this.options.width,
+        height: <number>this.options.height,
+        html: <string>'',
+        pageUrl: <string>urlList[start],
+        optimiseHtml: this.options.optimiseHtml,
+        optimiseHtmlOptions: this.options.optimiseHtmlOptions
+      };
 
       for (start; start <= end; start++) {
         const page = await instance.createPage();
         console.info(`Processing: ${urlList[start]} on instance ${instance.process.pid}`);
 
-        if (this.options.optimiseHtml === true) {
-          optimiseObj = {
-            cssUrl: <string>'',
-            width: <number>this.options.width,
-            height: <number>this.options.height,
-            html: <string>'',
-            pageUrl: <string>urlList[start],
-            optimiseHtml: this.options.optimiseHtml,
-            optimiseHtmlOptions: this.options.optimiseHtmlOptions
-          };
+        if (this.options.inlineCss === true) {
           await page.on('onResourceRequested', (requestData, networkRequest) => {
             let reg = new RegExp(`(?=.${this.options.domain})(?=.*\.css)`, 'i');
             if (reg.test(requestData.url)) {
