@@ -1,7 +1,8 @@
 const fs = require('fs');
 const spastatic = require('../dist');
 const options = {
-  siteMapUrl: 'http://www.traveldk.com/sitemap.xml',
+  // siteMapUrl: 'http://www.dkfindout.com/sitemap.xml',
+  singlePageUrl: 'http://www.dkfindout.com/us/space/solar-system/uranus/',
   optimiseHtml: true,
   optimiseHtmloptions: {
     removeAttributeQuotes: true,
@@ -14,7 +15,7 @@ const options = {
     useShortDoctype: true
   },
   inlineCss: false,
-  domain: 'traveldk.com'
+  domain: 'dkfindout.com'
 }
 const spa = new spastatic(options);
 console.time('static');
@@ -28,7 +29,7 @@ spa.static()
     //   fs.writeFileSync('demo/efe' + location + 'index.html', page.content);
     // }
     console.timeEnd('static');
-
+    console.log('I am done!');
   })
   .catch((error) => {
     console.error(`catch on demo: ${error}`)

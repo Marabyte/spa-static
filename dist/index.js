@@ -33,11 +33,18 @@ class Spastatic {
     initPhantom(urlList) {
         return __awaiter(this, void 0, void 0, function* () {
             const cpuCount = os.cpus().length;
-            for (let i = 0; i < cpuCount; i++) {
+            let maxInstances;
+            if (urlList.length < cpuCount) {
+                maxInstances = urlList.length;
+            }
+            else {
+                maxInstances = cpuCount;
+            }
+            for (let i = 0; i < maxInstances; i++) {
                 let instance = yield phantom.create(['--ignore-ssl-errors=no'], { logLevel: 'error' });
                 let start = i * (Math.floor(urlList.length / cpuCount));
                 let end = (i + 1) * (Math.floor(urlList.length / cpuCount));
-                this.render(urlList, start, end, instance);
+                yield this.render(urlList, start, end, instance);
             }
         });
     }
@@ -51,7 +58,7 @@ class Spastatic {
                 };
                 let finalHtml;
                 let optimiseObj;
-                for (start; start < end; start++) {
+                for (start; start <= end; start++) {
                     const page = yield instance.createPage();
                     console.info(`Processing: ${urlList[start]} on instance ${instance.process.pid}`);
                     if (this.options.optimiseHtml === true) {
@@ -121,7 +128,7 @@ class Spastatic {
                 else {
                     throw new Error('Invalid sitemap or URL');
                 }
-                this.initPhantom(urlList);
+                return yield this.initPhantom(urlList);
             }
             catch (error) {
                 console.error(`Error in extractor: ${error}`);
