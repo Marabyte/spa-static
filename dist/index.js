@@ -33,7 +33,10 @@ class Spastatic {
     initPhantom(urlList) {
         return __awaiter(this, void 0, void 0, function* () {
             const cpuCount = os.cpus().length;
+            const urlCount = urlList.length;
             let maxInstances;
+            console.info(`INFO: ${cpuCount} cores available.`);
+            console.info(`INFO: ${urlCount} pages to process`);
             if (urlList.length < cpuCount) {
                 maxInstances = urlList.length;
             }
@@ -115,9 +118,9 @@ class Spastatic {
     static() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const urlExtractor = yield new urlExtractor_1.default(this.options.siteMapUrl);
                 let urlList;
                 if (this.options.siteMapUrl && helper.isXml(this.options.siteMapUrl)) {
+                    const urlExtractor = yield new urlExtractor_1.default(this.options.siteMapUrl);
                     urlList = yield urlExtractor.getUrlList();
                 }
                 else if (this.options.singlePageUrl && helper.isUrl(this.options.singlePageUrl)) {

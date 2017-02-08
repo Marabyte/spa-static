@@ -24,9 +24,13 @@ class Spastatic {
   constructor(options) {
     this.options = options;
   }
+
   private async initPhantom(urlList) {
     const cpuCount = os.cpus().length;
+    const urlCount = urlList.length;
     let maxInstances;
+    console.info(`INFO: ${cpuCount} cores available.`);
+    console.info(`INFO: ${urlCount} pages to process`);
     if (urlList.length < cpuCount) {
       maxInstances = urlList.length;
     } else {
@@ -39,6 +43,7 @@ class Spastatic {
       await this.render(urlList, start, end, instance);
     }
   }
+
   private async render(urlList: string[], start: number, end: number, instance) {
     try {
       let htmlArr = {
@@ -115,9 +120,9 @@ class Spastatic {
   }
   public async static() {
     try {
-      const urlExtractor = await new UrlExtractor(this.options.siteMapUrl);
       let urlList;
       if (this.options.siteMapUrl && helper.isXml(this.options.siteMapUrl)) {
+        const urlExtractor = await new UrlExtractor(this.options.siteMapUrl);
         urlList = await urlExtractor.getUrlList();
       } else if (this.options.singlePageUrl && helper.isUrl(this.options.singlePageUrl)) {
         urlList = [];
