@@ -2,6 +2,22 @@
 
 ### Features
 
+* logs more info about the system
+
+### Bug Fixes
+
+* none
+
+### BREAKING CHANGES
+
+* none
+
+
+
+#  v1.0.2 (2017-02-05)
+
+### Features
+
 * none
 
 ### Bug Fixes
