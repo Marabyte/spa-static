@@ -1,3 +1,18 @@
+#  v1.0.5 (2017-02-09)
+
+### Features
+
+* none
+
+### Bug Fixes
+
+* fixed a performance issue effecting single core machines.
+
+### BREAKING CHANGES
+
+* none
+
+
 #  v1.0.4 (2017-02-09)
 
 ### Features

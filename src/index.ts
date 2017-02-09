@@ -31,7 +31,7 @@ class Spastatic {
     let maxInstances;
     console.info(`INFO: ${cpuCount} cores available.`);
     console.info(`INFO: ${urlCount} pages to process`);
-    if (urlList.length < cpuCount) {
+    if (urlList.length <= cpuCount) {
       maxInstances = urlList.length;
     } else {
       maxInstances = cpuCount;
@@ -61,8 +61,8 @@ class Spastatic {
         optimiseHtml: this.options.optimiseHtml,
         optimiseHtmlOptions: this.options.optimiseHtmlOptions
       };
-      console.log(`INFO: working on page ${start + 1} of ${end + 1}`);
       for (start; start <= end; start++) {
+        console.log(`INFO: working on page ${start + 1} of ${end + 1}`);
         const page = await instance.createPage();
         console.info(`Processing: ${urlList[start]} on instance ${instance.process.pid}`);
 
