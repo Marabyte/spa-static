@@ -16,7 +16,7 @@ class Spastatic {
     singlePageUrl: <string>null,
     optimiseHtml: <boolean>false,
     optimiseHtmlOptions: <any>null,
-    domain: <string>'mywebsite.com',
+    domain: <string>'google.com',
     inlineCss: <boolean>false,
     width: <number>375,
     height: <number>667
@@ -53,7 +53,20 @@ class Spastatic {
     }
 
     return Promise.all(batch).then(data => {
-      console.log(data);
+      // After all promises are ready, builds the report object.
+      let report = {
+        staticUrls: [],
+        urlsWithHtmlErrorsList: [],
+        urlOk : 0,
+        urlsWithHtmlErrors: 0
+      };
+      for (let obj of data) {
+        report.staticUrls = report.staticUrls.concat(obj.staticUrls);
+        report.urlsWithHtmlErrorsList = report.urlsWithHtmlErrorsList.concat(obj.staticUrls);
+        report.urlsWithHtmlErrors = report.urlsWithHtmlErrors + obj.urlsWithHtmlErrors;
+        report.urlOk = report.urlOk + obj.urlOk;
+      }
+      return report;
     });
   }
 

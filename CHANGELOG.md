@@ -1,3 +1,19 @@
+#  v1.0.7 (2017-02-09)
+
+### Features
+
+* Performance improvements
+
+### Bug Fixes
+
+* none
+
+### BREAKING CHANGES
+
+* none
+
+
+
 #  v1.0.6 (2017-02-09)
 
 ### Features
