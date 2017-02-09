@@ -1,6 +1,6 @@
 {
   "name": "spastatic",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "It's Spastatic! It generates static HTML pages of a website to improve page loading time and making it SEO friendly",
   "main": "dist/index.js",
   "scripts": {
