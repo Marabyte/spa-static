@@ -22,12 +22,7 @@ console.time('static');
 spa.static()
   .then(
   (html) => {
-    // console.log(`number on urls: ${html.length}`);
-    // for (let page of html) {
-    //   let location = page.url.replace(/^.*\/\/[^\/]+/,'');
-    //   console.log(`Saving: ${location}index.html`);
-    //   fs.writeFileSync('demo/efe' + location + 'index.html', page.content);
-    // }
+    console.log(html);
     console.timeEnd('static');
     console.log('I am done!');
   })

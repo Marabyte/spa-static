@@ -3,7 +3,7 @@ version: "2"
 services:
   app:
     build: .
-    command: nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/index.ts
+    command: nodemon demo/demo.js
     environment:
         NODE_ENV: dev
     ports:

@@ -31,25 +31,26 @@ class Spastatic {
     let maxInstances;
     console.info(`INFO: ${cpuCount} cores available.`);
     console.info(`INFO: ${urlCount} pages to process`);
-    if (urlList.length <= cpuCount) {
-      maxInstances = urlList.length;
-    } else {
+    if (urlList.length > cpuCount) {
       maxInstances = cpuCount;
+    } else {
+      maxInstances = urlList.length;
     }
     for (let i = 0; i < maxInstances; i++) {
       let instance = await phantom.create(['--ignore-ssl-errors=no'], { logLevel: 'error' });
       let start = i * (Math.floor(urlList.length / cpuCount));
       let end = (i + 1) * (Math.floor(urlList.length / cpuCount));
-      await this.render(urlList, start, end, instance);
+      return await this.render(urlList, start, end, instance);
     }
   }
 
   private async render(urlList: string[], start: number, end: number, instance) {
     try {
       let htmlArr = {
+        staticUrls: <any>[],
         urlOk: <number>0,
-        urlFail: <number>0,
-        urlFailList: <any>[]
+        urlsWithHtmlErrors: <number>0,
+        urlsWithHtmlErrorsList: <any>[]
       };
       let finalHtml;
       let optimiseObj = {
@@ -90,24 +91,23 @@ class Spastatic {
           finalHtml.html = content;
         }
 
-
         if (finalHtml.error) {
-          htmlArr.urlFail = htmlArr.urlFail + 1;
-          htmlArr.urlFailList.push(finalHtml.url);
+          htmlArr.urlsWithHtmlErrors = htmlArr.urlsWithHtmlErrors + 1;
+          htmlArr.urlsWithHtmlErrorsList.push(finalHtml.url);
         } else {
           htmlArr.urlOk = htmlArr.urlOk + 1;
         }
 
         let location = urlList[start].replace(/^.*\/\/[^\/]+/, '');
-        console.log(`Saving: static/${this.options.domain}${location}index.html`);
+        let filePath = this.options.domain + location + 'index.html';
+        htmlArr.staticUrls.push(filePath);
+        console.log(`Saving: static/${filePath}`);
 
         if (!location.length) {
           location = '/';
         }
         mkpath.sync('static/' + this.options.domain + location, '0700');
         fs.writeFileSync('static/' + this.options.domain + location + 'index.html', finalHtml.html);
-
-        // await instance.exit();
 
       }
 

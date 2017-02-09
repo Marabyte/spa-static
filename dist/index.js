@@ -37,17 +37,17 @@ class Spastatic {
             let maxInstances;
             console.info(`INFO: ${cpuCount} cores available.`);
             console.info(`INFO: ${urlCount} pages to process`);
-            if (urlList.length <= cpuCount) {
-                maxInstances = urlList.length;
+            if (urlList.length > cpuCount) {
+                maxInstances = cpuCount;
             }
             else {
-                maxInstances = cpuCount;
+                maxInstances = urlList.length;
             }
             for (let i = 0; i < maxInstances; i++) {
                 let instance = yield phantom.create(['--ignore-ssl-errors=no'], { logLevel: 'error' });
                 let start = i * (Math.floor(urlList.length / cpuCount));
                 let end = (i + 1) * (Math.floor(urlList.length / cpuCount));
-                yield this.render(urlList, start, end, instance);
+                return yield this.render(urlList, start, end, instance);
             }
         });
     }
@@ -55,9 +55,10 @@ class Spastatic {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let htmlArr = {
+                    staticUrls: [],
                     urlOk: 0,
-                    urlFail: 0,
-                    urlFailList: []
+                    urlsWithHtmlErrors: 0,
+                    urlsWithHtmlErrorsList: []
                 };
                 let finalHtml;
                 let optimiseObj = {
@@ -94,14 +95,16 @@ class Spastatic {
                         finalHtml.html = content;
                     }
                     if (finalHtml.error) {
-                        htmlArr.urlFail = htmlArr.urlFail + 1;
-                        htmlArr.urlFailList.push(finalHtml.url);
+                        htmlArr.urlsWithHtmlErrors = htmlArr.urlsWithHtmlErrors + 1;
+                        htmlArr.urlsWithHtmlErrorsList.push(finalHtml.url);
                     }
                     else {
                         htmlArr.urlOk = htmlArr.urlOk + 1;
                     }
                     let location = urlList[start].replace(/^.*\/\/[^\/]+/, '');
-                    console.log(`Saving: static/${this.options.domain}${location}index.html`);
+                    let filePath = this.options.domain + location + 'index.html';
+                    htmlArr.staticUrls.push(filePath);
+                    console.log(`Saving: static/${filePath}`);
                     if (!location.length) {
                         location = '/';
                     }

@@ -1,3 +1,19 @@
+#  v1.0.6 (2017-02-09)
+
+### Features
+
+* Added list of urls with HTML errors
+
+### Bug Fixes
+
+* none
+
+### BREAKING CHANGES
+
+* none
+
+
+
 #  v1.0.5 (2017-02-09)
 
 ### Features
