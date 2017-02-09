@@ -34,21 +34,33 @@ class Spastatic {
         return __awaiter(this, void 0, void 0, function* () {
             const cpuCount = os.cpus().length;
             const urlCount = urlList.length;
-            let maxInstances;
+            let maxInstances, workload;
+            let batch = [];
             console.info(`INFO: ${cpuCount} cores available.`);
             console.info(`INFO: ${urlCount} pages to process`);
             if (urlList.length > cpuCount) {
                 maxInstances = cpuCount;
+                workload = Math.floor(urlList.length / cpuCount);
+                for (let i = 0; i < maxInstances; i++) {
+                    let instance = yield phantom.create(['--ignore-ssl-errors=no'], { logLevel: 'error' });
+                    let start = i * workload;
+                    let end = (i + 1) * workload;
+                    batch.push(this.render(urlList, start, end, instance));
+                }
             }
             else {
                 maxInstances = urlList.length;
+                workload = 1;
+                for (let i = 0; i < maxInstances; i++) {
+                    let instance = yield phantom.create(['--ignore-ssl-errors=no'], { logLevel: 'error' });
+                    let start = i;
+                    let end = i;
+                    batch.push(this.render(urlList, start, end, instance));
+                }
             }
-            for (let i = 0; i < maxInstances; i++) {
-                let instance = yield phantom.create(['--ignore-ssl-errors=no'], { logLevel: 'error' });
-                let start = i * (Math.floor(urlList.length / cpuCount));
-                let end = (i + 1) * (Math.floor(urlList.length / cpuCount));
-                return yield this.render(urlList, start, end, instance);
-            }
+            return Promise.all(batch).then((data) => {
+                console.log(data);
+            });
         });
     }
     render(urlList, start, end, instance) {
@@ -71,7 +83,7 @@ class Spastatic {
                     optimiseHtmlOptions: this.options.optimiseHtmlOptions
                 };
                 for (start; start <= end; start++) {
-                    console.log(`INFO: working on page ${start + 1} of ${end + 1}`);
+                    console.log(`INFO: working on page ${start + 1} of ${urlList.length}`);
                     const page = yield instance.createPage();
                     console.info(`Processing: ${urlList[start]} on instance ${instance.process.pid}`);
                     if (this.options.inlineCss === true) {
