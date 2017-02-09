@@ -69,6 +69,7 @@ class Spastatic {
                     optimiseHtml: this.options.optimiseHtml,
                     optimiseHtmlOptions: this.options.optimiseHtmlOptions
                 };
+                console.log(`INFO: working on page ${start + 1} of ${end + 1}`);
                 for (start; start <= end; start++) {
                     const page = yield instance.createPage();
                     console.info(`Processing: ${urlList[start]} on instance ${instance.process.pid}`);

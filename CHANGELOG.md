@@ -1,4 +1,19 @@
-#  v1.0.2 (2017-02-05)
+#  v1.0.4 (2017-02-09)
+
+### Features
+
+* more logging
+
+### Bug Fixes
+
+* none
+
+### BREAKING CHANGES
+
+* none
+
+
+#  v1.0.3 (2017-02-05)
 
 ### Features
 

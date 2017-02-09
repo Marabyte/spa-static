@@ -76,7 +76,7 @@ export default class PageOptimiser {
       minyObj.html = minfyHtml(dom.html(), options);
       return minyObj;
     } catch (error) {
-      console.error(`Error optimising HTML: ${error}`);
+      console.error(`Error optimising HTML: The HTML contains syntax errors and cannot be optimised`);
       minyObj.html = optimiserObj.html;
       minyObj.error = true;
       return minyObj;
