@@ -1,8 +1,8 @@
 const fs = require('fs');
 const spastatic = require('../dist');
 const options = {
-  //siteMapUrl: 'http://www.dkfindout.com/sitemap.xml',
-  singlePageUrl: 'http://www.dkfindout.com/us/space/solar-system/uranus/',
+  siteMapUrl: 'http://www.dkfindout.com/sitemap.xml',
+  //singlePageUrl: 'http://www.dkfindout.com/uk/',
   optimiseHtml: true,
   optimiseHtmlOptions: {
     removeAttributeQuotes: true,

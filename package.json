@@ -45,7 +45,7 @@
     "cssnano": "^3.10.0",
     "html-minifier": "^3.2.3",
     "mkpath": "^1.0.0",
-    "phantom": "^2.1.21",
+    "phantom": "^4.0.0",
     "postcss": "5.2.9",
     "request": "^2.79.0",
     "request-promise-native": "^1.0.3",

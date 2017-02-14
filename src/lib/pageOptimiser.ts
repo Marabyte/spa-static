@@ -67,7 +67,7 @@ export default class PageOptimiser {
     let minyObj = {
       html: <string>'',
       error: <boolean>false,
-      url: optimiserObj.pageUrl
+      url: <string> optimiserObj.pageUrl
     };
     try {
       const minfyHtml = minify.minify;

@@ -18,8 +18,8 @@ class Spastatic {
     optimiseHtmlOptions: <any>null,
     domain: <string>'google.com',
     inlineCss: <boolean>false,
-    width: <number>375,
-    height: <number>667
+    width: <number>1024,
+    height: <number>768
   };
   constructor(options) {
     this.options = options;
@@ -28,49 +28,44 @@ class Spastatic {
   private async initPhantom(urlList) {
     const cpuCount = os.cpus().length;
     const urlCount = urlList.length;
-    let maxInstances, workload;
-    let batch = [];
     console.info(`INFO: ${cpuCount} cores available.`);
-    console.info(`INFO: ${urlCount} pages to process`);
-    if (urlList.length > cpuCount) {
-      maxInstances = cpuCount;
-      workload = Math.floor(urlList.length / cpuCount);
-      for (let i = 0; i < maxInstances; i++) {
-        let instance = await phantom.create(['--ignore-ssl-errors=no'], { logLevel: 'error' });
-        let start = i * workload;
-        let end = (i + 1) * workload;
-        batch.push(this.render(urlList, start, end, instance));
-      }
-    } else {
-      maxInstances = urlList.length;
-      workload = 1;
-      for (let i = 0; i < maxInstances; i++) {
-        let instance = await phantom.create(['--ignore-ssl-errors=no'], { logLevel: 'error' });
-        let start = i;
-        let end = i;
-        batch.push(this.render(urlList, start, end, instance));
-      }
+    console.info(`INFO: ${urlCount} pages to process.`);
+
+    let batch = [];
+    let nInstances = Math.ceil(urlCount / 25);
+    let workload = [];
+
+    for (let i = 0; i < urlCount; i += 25) {
+
+      workload.push(urlList.slice(i, i + 25));
     }
+
+    batch.push(this.render(urlList, workload));
 
     return Promise.all(batch).then(data => {
       // After all promises are ready, builds the report object.
       let report = {
         staticUrls: [],
         urlsWithHtmlErrorsList: [],
-        urlOk : 0,
+        urlOk: 0,
         urlsWithHtmlErrors: 0
       };
       for (let obj of data) {
         report.staticUrls = report.staticUrls.concat(obj.staticUrls);
-        report.urlsWithHtmlErrorsList = report.urlsWithHtmlErrorsList.concat(obj.staticUrls);
-        report.urlsWithHtmlErrors = report.urlsWithHtmlErrors + obj.urlsWithHtmlErrors;
-        report.urlOk = report.urlOk + obj.urlOk;
+        report.urlsWithHtmlErrorsList = report.urlsWithHtmlErrorsList.concat(obj.urlsWithHtmlErrorsList);
+        report.urlsWithHtmlErrors = report.urlsWithHtmlErrorsList.length;
+        report.urlOk = report.staticUrls.length;
       }
+      fs.writeFile('static/report.json', JSON.stringify(report));
       return report;
     });
   }
 
-  private async render(urlList: string[], start: number, end: number, instance) {
+  private async tasker() {
+
+  }
+
+  private async render(urlList: string[], workload) {
     try {
       let htmlArr = {
         staticUrls: <any>[],
@@ -78,64 +73,81 @@ class Spastatic {
         urlsWithHtmlErrors: <number>0,
         urlsWithHtmlErrorsList: <any>[]
       };
-      let finalHtml;
+      let finalHtml = {
+        html: <string>'',
+        error: <boolean>false,
+        url: <string>''
+      };
       let optimiseObj = {
         cssUrl: <string>'',
         width: <number>this.options.width,
         height: <number>this.options.height,
         html: <string>'',
-        pageUrl: <string>urlList[start],
+        pageUrl: <string>'',
         optimiseHtml: this.options.optimiseHtml,
         optimiseHtmlOptions: this.options.optimiseHtmlOptions
       };
-      for (start; start <= end; start++) {
-        console.log(`INFO: working on page ${start + 1} of ${urlList.length}`);
+      for (let o = 0; o < workload.length; o++) {
+        let instance = await phantom.create([
+          '--ignore-ssl-errors=yes',
+          '--load-images=no',
+          '--disk-cache=true'
+        ]);
         const page = await instance.createPage();
-        console.info(`Processing: ${urlList[start]} on instance ${instance.process.pid}`);
 
-        if (this.options.inlineCss === true) {
-          await page.on('onResourceRequested', (requestData, networkRequest) => {
-            let reg = new RegExp(`(?=.${this.options.domain})(?=.*\.css)`, 'i');
-            if (reg.test(requestData.url)) {
-              optimiseObj.cssUrl = requestData.url;
+        page.property('viewportSize', { width: 1024, height: 768 });
+        page.property('resourceTimeout', 10000);
+
+        for (let i = 0; i < workload[o].length; i++) {
+          let url = workload[o][i];
+          console.info(`INFO: Processing: ${url} on instance ${instance.process.pid}`);
+          if (this.options.inlineCss === true) {
+
+            await page.on('onError', (error) => {
+              console.error(error);
+            });
+
+          }
+          const status = await page.open(url);
+          if (status === 'fail') {
+            htmlArr.urlsWithHtmlErrorsList.push(finalHtml.url);
+          }
+
+          await page.on('onResourceRequested', true, function (requestData, networkRequest) {
+            if (requestData.url.indexOf('dkfindout.com') === -1) {
+              networkRequest.abort();
             }
           });
 
-          await page.on('onError', (error) => {
-            console.error(error);
-          });
+          console.info(`INFO: Page opened with status ${status}`);
+          const content = await page.property('content');
 
+          if (this.options.optimiseHtml === true) {
+            optimiseObj.pageUrl = workload[i];
+            optimiseObj.html = content;
+            finalHtml = await pageOptimiser.optimise(optimiseObj);
+          } else {
+            finalHtml.html = content;
+          }
+
+          let location = url.replace(/^.*\/\/[^\/]+/, '');
+          let filePath = this.options.domain + location + 'index.html';
+          htmlArr.staticUrls.push(filePath);
+          console.info(`INFO: Saving: static/${filePath}`);
+          if (!location.length) {
+            location = '/';
+          }
+          mkpath.sync('static/' + this.options.domain + location, '0700');
+          fs.writeFileSync('static/' + this.options.domain + location + 'index.html', finalHtml.html);
+          let safeloc = encodeURIComponent(location);
+          await page.render('static/' + this.options.domain + '/screenshot/' + safeloc + 'index.png');
         }
 
-        await page.open(urlList[start]);
-        const content = await page.property('content');
-
-        if (this.options.optimiseHtml === true) {
-          optimiseObj.html = content;
-          finalHtml = await pageOptimiser.optimise(optimiseObj);
-        } else {
-          finalHtml.html = content;
-        }
-
-        if (finalHtml.error) {
-          htmlArr.urlsWithHtmlErrors = htmlArr.urlsWithHtmlErrors + 1;
-          htmlArr.urlsWithHtmlErrorsList.push(finalHtml.url);
-        } else {
-          htmlArr.urlOk = htmlArr.urlOk + 1;
-        }
-
-        let location = urlList[start].replace(/^.*\/\/[^\/]+/, '');
-        let filePath = this.options.domain + location + 'index.html';
-        htmlArr.staticUrls.push(filePath);
-        console.log(`Saving: static/${filePath}`);
-
-        if (!location.length) {
-          location = '/';
-        }
-        mkpath.sync('static/' + this.options.domain + location, '0700');
-        fs.writeFileSync('static/' + this.options.domain + location + 'index.html', finalHtml.html);
+        console.info('INFO: Closing Instance.');
+        instance.exit();
 
       }
+
 
       return htmlArr;
     } catch (error) {
