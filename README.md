@@ -119,5 +119,4 @@ Let me know <https://github.com/Marabyte/spastatic/issues>
 
 
 
-
 marabyte/2017
