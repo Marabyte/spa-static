@@ -2,7 +2,7 @@ const fs = require('fs');
 const spastatic = require('../dist');
 const options = {
   siteMapUrl: 'http://www.dkfindout.com/sitemap.xml',
-  //singlePageUrl: 'http://www.dkfindout.com/uk/',
+  // singlePageUrl: 'http://www.traveldk.com/article/an-architectural-tour-2016s-top-10-cities/',
   optimiseHtml: true,
   optimiseHtmlOptions: {
     removeAttributeQuotes: true,

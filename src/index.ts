@@ -19,7 +19,8 @@ class Spastatic {
     domain: <string>'google.com',
     inlineCss: <boolean>false,
     width: <number>1024,
-    height: <number>768
+    height: <number>768,
+    screenshot: <boolean>false
   };
   constructor(options) {
     this.options = options;
@@ -61,11 +62,7 @@ class Spastatic {
     });
   }
 
-  private async tasker() {
-
-  }
-
-  private async render(urlList: string[], workload) {
+  private async render(urlList: string[], workload: any[]) {
     try {
       let htmlArr = {
         staticUrls: <any>[],
@@ -87,71 +84,85 @@ class Spastatic {
         optimiseHtml: this.options.optimiseHtml,
         optimiseHtmlOptions: this.options.optimiseHtmlOptions
       };
-      for (let o = 0; o < workload.length; o++) {
+      for (let i = 0; i < workload.length; i++) {
         let instance = await phantom.create([
           '--ignore-ssl-errors=yes',
           '--load-images=no',
           '--disk-cache=true'
         ]);
-        const page = await instance.createPage();
 
-        page.property('viewportSize', { width: 1024, height: 768 });
-        page.property('resourceTimeout', 10000);
+        await Promise.all(
+          workload[i].map(async (staticFile) => {
+            const url = staticFile;
+            const page = await instance.createPage();
+            const content = await page.property('content');
+            page.property('viewportSize', { width: 1024, height: 768 });
+            page.property('resourceTimeout', 10000);
 
-        for (let i = 0; i < workload[o].length; i++) {
-          let url = workload[o][i];
-          console.info(`INFO: Processing: ${url} on instance ${instance.process.pid}`);
-          if (this.options.inlineCss === true) {
-
-            await page.on('onError', (error) => {
-              console.error(error);
+            // onResourceRequested is serialised and runs inside Phantomjs' instance.
+            // Code is restricted to es5
+            await page.on('onResourceRequested', true, function (requestData, networkRequest) {
+              var whitelist = [
+                'opensolr.com',
+                this.options.domain
+              ];
+              for (var i = 0; i < whitelist.length; i++) {
+                if (requestData.url.indexOf(whitelist[i]) === -1) {
+                  networkRequest.abort();
+                }
+              }
             });
 
-          }
-          const status = await page.open(url);
-          if (status === 'fail') {
-            htmlArr.urlsWithHtmlErrorsList.push(finalHtml.url);
-          }
+            console.info(`INFO: Processing: ${url} on instance ${instance.process.pid}`);
+            const status = await page.open(url);
 
-          await page.on('onResourceRequested', true, function (requestData, networkRequest) {
-            if (requestData.url.indexOf('dkfindout.com') === -1) {
-              networkRequest.abort();
+            if (status === 'fail') {
+              htmlArr.urlsWithHtmlErrorsList.push(finalHtml.url);
             }
-          });
 
-          console.info(`INFO: Page opened with status ${status}`);
-          const content = await page.property('content');
+            console.info(`INFO: Page opened with status ${status}`);
 
-          if (this.options.optimiseHtml === true) {
-            optimiseObj.pageUrl = workload[i];
-            optimiseObj.html = content;
-            finalHtml = await pageOptimiser.optimise(optimiseObj);
-          } else {
-            finalHtml.html = content;
-          }
+            if (this.options.inlineCss === true) {
+            }
 
-          let location = url.replace(/^.*\/\/[^\/]+/, '');
-          let filePath = this.options.domain + location + 'index.html';
-          htmlArr.staticUrls.push(filePath);
-          console.info(`INFO: Saving: static/${filePath}`);
-          if (!location.length) {
-            location = '/';
-          }
-          mkpath.sync('static/' + this.options.domain + location, '0700');
-          fs.writeFileSync('static/' + this.options.domain + location + 'index.html', finalHtml.html);
-          let safeloc = encodeURIComponent(location);
-          await page.render('static/' + this.options.domain + '/screenshot/' + safeloc + 'index.png');
-        }
+            if (this.options.optimiseHtml === true) {
+              optimiseObj.pageUrl = staticFile;
+              optimiseObj.html = content;
+              finalHtml = await pageOptimiser.optimise(optimiseObj);
+            } else {
+              finalHtml.html = content;
+            }
 
+            const filePath = await this.writeToDisk(url, finalHtml.html, page);
+            htmlArr.staticUrls.push(filePath);
+            console.info(`INFO: Saving: static/${filePath}`);
+          })
+        );
         console.info('INFO: Closing Instance.');
         instance.exit();
-
       }
-
-
       return htmlArr;
     } catch (error) {
-      console.error(`Error: ${error}`);
+      throw new Error(error);
+    }
+
+  }
+
+  private async writeToDisk(url, html, page) {
+    try {
+      let location = url.replace(/^.*\/\/[^\/]+/, '');
+      let filePath = this.options.domain + location + 'index.html';
+      if (!location.length) {
+        location = '/';
+      }
+      mkpath.sync('static/' + this.options.domain + location, '0700');
+      fs.writeFileSync('static/' + this.options.domain + location + 'index.html', html);
+      if (this.options.screenshot) {
+        let safeloc = encodeURIComponent(location);
+        await page.render('static/' + this.options.domain + '/screenshot/' + safeloc + 'index.png');
+      }
+      return filePath;
+    } catch (error) {
       throw new Error(error);
     }
 

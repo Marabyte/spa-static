@@ -2,18 +2,18 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
+        step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
-const phantom = require("phantom");
-const os = require("os");
-const urlExtractor_1 = require("./lib/urlExtractor");
-const pageOptimiser_1 = require("./lib/pageOptimiser");
-const helper_1 = require("./lib/helper");
-const fs = require("fs");
-const mkpath = require("mkpath");
+const phantom = require('phantom');
+const os = require('os');
+const urlExtractor_1 = require('./lib/urlExtractor');
+const pageOptimiser_1 = require('./lib/pageOptimiser');
+const helper_1 = require('./lib/helper');
+const fs = require('fs');
+const mkpath = require('mkpath');
 const helper = new helper_1.default();
 const pageOptimiser = new pageOptimiser_1.default();
 class Spastatic {
@@ -26,7 +26,8 @@ class Spastatic {
             domain: 'google.com',
             inlineCss: false,
             width: 1024,
-            height: 768
+            height: 768,
+            screenshot: false
         };
         this.options = options;
     }
@@ -62,10 +63,6 @@ class Spastatic {
             });
         });
     }
-    tasker() {
-        return __awaiter(this, void 0, void 0, function* () {
-        });
-    }
     render(urlList, workload) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -89,61 +86,78 @@ class Spastatic {
                     optimiseHtml: this.options.optimiseHtml,
                     optimiseHtmlOptions: this.options.optimiseHtmlOptions
                 };
-                for (let o = 0; o < workload.length; o++) {
+                for (let i = 0; i < workload.length; i++) {
                     let instance = yield phantom.create([
                         '--ignore-ssl-errors=yes',
                         '--load-images=no',
                         '--disk-cache=true'
                     ]);
-                    const page = yield instance.createPage();
-                    page.property('viewportSize', { width: 1024, height: 768 });
-                    page.property('resourceTimeout', 10000);
-                    for (let i = 0; i < workload[o].length; i++) {
-                        let url = workload[o][i];
+                    yield Promise.all(workload[i].map((staticFile) => __awaiter(this, void 0, void 0, function* () {
+                        const url = staticFile;
+                        const page = yield instance.createPage();
+                        const content = yield page.property('content');
+                        page.property('viewportSize', { width: 1024, height: 768 });
+                        page.property('resourceTimeout', 10000);
+                        // onResourceRequested is serialised and runs inside Phantomjs' instance.
+                        // Code is restricted to es5
+                        yield page.on('onResourceRequested', true, function (requestData, networkRequest) {
+                            var whitelist = [
+                                'opensolr.com',
+                                this.options.domain
+                            ];
+                            for (var i = 0; i < whitelist.length; i++) {
+                                if (requestData.url.indexOf(whitelist[i]) === -1) {
+                                    networkRequest.abort();
+                                }
+                            }
+                        });
                         console.info(`INFO: Processing: ${url} on instance ${instance.process.pid}`);
-                        if (this.options.inlineCss === true) {
-                            yield page.on('onError', (error) => {
-                                console.error(error);
-                            });
-                        }
                         const status = yield page.open(url);
                         if (status === 'fail') {
                             htmlArr.urlsWithHtmlErrorsList.push(finalHtml.url);
                         }
-                        yield page.on('onResourceRequested', true, function (requestData, networkRequest) {
-                            if (requestData.url.indexOf('dkfindout.com') === -1) {
-                                networkRequest.abort();
-                            }
-                        });
                         console.info(`INFO: Page opened with status ${status}`);
-                        const content = yield page.property('content');
+                        if (this.options.inlineCss === true) {
+                        }
                         if (this.options.optimiseHtml === true) {
-                            optimiseObj.pageUrl = workload[i];
+                            optimiseObj.pageUrl = staticFile;
                             optimiseObj.html = content;
                             finalHtml = yield pageOptimiser.optimise(optimiseObj);
                         }
                         else {
                             finalHtml.html = content;
                         }
-                        let location = url.replace(/^.*\/\/[^\/]+/, '');
-                        let filePath = this.options.domain + location + 'index.html';
+                        const filePath = yield this.writeToDisk(url, finalHtml.html, page);
                         htmlArr.staticUrls.push(filePath);
                         console.info(`INFO: Saving: static/${filePath}`);
-                        if (!location.length) {
-                            location = '/';
-                        }
-                        mkpath.sync('static/' + this.options.domain + location, '0700');
-                        fs.writeFileSync('static/' + this.options.domain + location + 'index.html', finalHtml.html);
-                        let safeloc = encodeURIComponent(location);
-                        yield page.render('static/' + this.options.domain + '/screenshot/' + safeloc + 'index.png');
-                    }
+                    })));
                     console.info('INFO: Closing Instance.');
                     instance.exit();
                 }
                 return htmlArr;
             }
             catch (error) {
-                console.error(`Error: ${error}`);
+                throw new Error(error);
+            }
+        });
+    }
+    writeToDisk(url, html, page) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let location = url.replace(/^.*\/\/[^\/]+/, '');
+                let filePath = this.options.domain + location + 'index.html';
+                if (!location.length) {
+                    location = '/';
+                }
+                mkpath.sync('static/' + this.options.domain + location, '0700');
+                fs.writeFileSync('static/' + this.options.domain + location + 'index.html', html);
+                if (this.options.screenshot) {
+                    let safeloc = encodeURIComponent(location);
+                    yield page.render('static/' + this.options.domain + '/screenshot/' + safeloc + 'index.png');
+                }
+                return filePath;
+            }
+            catch (error) {
                 throw new Error(error);
             }
         });
