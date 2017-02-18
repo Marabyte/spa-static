@@ -1,3 +1,17 @@
+#  v1.1.0 (2017-02-18)
+
+### Features
+
+* Whitelists requests from external domains
+
+### Bug Fixes
+
+* none
+
+### BREAKING CHANGES
+
+* none
+
 #  v1.0.7 (2017-02-09)
 
 ### Features

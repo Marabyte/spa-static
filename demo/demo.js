@@ -15,7 +15,10 @@ const options = {
     useShortDoctype: true
   },
   inlineCss: false,
-  domain: 'dkfindout.com'
+  domain: 'dkfindout.com',
+  whitelist: [
+    'opensolr.com'
+  ]
 }
 const spa = new spastatic(options);
 console.time('static');

@@ -16,14 +16,26 @@ class Spastatic {
     singlePageUrl: <string>null,
     optimiseHtml: <boolean>false,
     optimiseHtmlOptions: <any>null,
-    domain: <string>'google.com',
+    domain: <string>'',
     inlineCss: <boolean>false,
     width: <number>1024,
     height: <number>768,
-    screenshot: <boolean>false
+    screenshot: <boolean>false,
+    whitelist: <string[]>[]
   };
   constructor(options) {
-    this.options = options;
+    if (!options.siteMapUrl && !options.singlePageUrl) {
+      throw new Error(`ERROR: Either 'siteMapUrl' or 'singlePageUrl' are required`);
+    }
+
+    if (options.whitelist && options.whitelist.length) {
+      this.options.whitelist.concat(options.whitlist);
+    }
+
+    Object.assign(this.options, options);
+    this.options.whitelist.push(options.domain);
+
+    console.log(this.options);
   }
 
   private async initPhantom(urlList) {
@@ -96,18 +108,14 @@ class Spastatic {
             const url = staticFile;
             const page = await instance.createPage();
             const content = await page.property('content');
-            page.property('viewportSize', { width: 1024, height: 768 });
+            page.property('viewportSize', { width: this.options.width, height: this.options.height });
             page.property('resourceTimeout', 10000);
 
             // onResourceRequested is serialised and runs inside Phantomjs' instance.
             // Code is restricted to es5
             await page.on('onResourceRequested', true, function (requestData, networkRequest) {
-              var whitelist = [
-                'opensolr.com',
-                this.options.domain
-              ];
-              for (var i = 0; i < whitelist.length; i++) {
-                if (requestData.url.indexOf(whitelist[i]) === -1) {
+              for (var i = 0; i < this.options.whitelist.length; i++) {
+                if (requestData.url.indexOf(this.options.whitelist[i]) === -1) {
                   networkRequest.abort();
                 }
               }

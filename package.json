@@ -5,9 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "jasmine",
-    "build-patch": "tsc && git commit -am 'BUILD : Patch update' && npm version patch",
-    "build-minor": "tsc && git commit -am 'BUILD : Minor update' && npm version minor",
-    "build-major": "tsc && git commit -am 'BUILD : Major update' && npm version major"
+    "build-patch": "tsc && git commit -m 'BUILD : Patch update' && npm version patch",
+    "build-minor": "tsc && git commit -m 'BUILD : Minor update' && npm version minor",
+    "build-major": "tsc && git commit -m 'BUILD : Major update' && npm version major"
   },
   "engines": {
     "node": ">=6.5.0"

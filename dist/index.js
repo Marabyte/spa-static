@@ -2,18 +2,18 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments)).next());
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const phantom = require('phantom');
-const os = require('os');
-const urlExtractor_1 = require('./lib/urlExtractor');
-const pageOptimiser_1 = require('./lib/pageOptimiser');
-const helper_1 = require('./lib/helper');
-const fs = require('fs');
-const mkpath = require('mkpath');
+const phantom = require("phantom");
+const os = require("os");
+const urlExtractor_1 = require("./lib/urlExtractor");
+const pageOptimiser_1 = require("./lib/pageOptimiser");
+const helper_1 = require("./lib/helper");
+const fs = require("fs");
+const mkpath = require("mkpath");
 const helper = new helper_1.default();
 const pageOptimiser = new pageOptimiser_1.default();
 class Spastatic {
@@ -23,13 +23,22 @@ class Spastatic {
             singlePageUrl: null,
             optimiseHtml: false,
             optimiseHtmlOptions: null,
-            domain: 'google.com',
+            domain: '',
             inlineCss: false,
             width: 1024,
             height: 768,
-            screenshot: false
+            screenshot: false,
+            whitelist: []
         };
-        this.options = options;
+        if (!options.siteMapUrl && !options.singlePageUrl) {
+            throw new Error(`ERROR: Either 'siteMapUrl' or 'singlePageUrl' are required`);
+        }
+        if (options.whitelist && options.whitelist.length) {
+            this.options.whitelist.concat(options.whitlist);
+        }
+        Object.assign(this.options, options);
+        this.options.whitelist.push(options.domain);
+        console.log(this.options);
     }
     initPhantom(urlList) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -96,17 +105,13 @@ class Spastatic {
                         const url = staticFile;
                         const page = yield instance.createPage();
                         const content = yield page.property('content');
-                        page.property('viewportSize', { width: 1024, height: 768 });
+                        page.property('viewportSize', { width: this.options.width, height: this.options.height });
                         page.property('resourceTimeout', 10000);
                         // onResourceRequested is serialised and runs inside Phantomjs' instance.
                         // Code is restricted to es5
                         yield page.on('onResourceRequested', true, function (requestData, networkRequest) {
-                            var whitelist = [
-                                'opensolr.com',
-                                this.options.domain
-                            ];
-                            for (var i = 0; i < whitelist.length; i++) {
-                                if (requestData.url.indexOf(whitelist[i]) === -1) {
+                            for (var i = 0; i < this.options.whitelist.length; i++) {
+                                if (requestData.url.indexOf(this.options.whitelist[i]) === -1) {
                                     networkRequest.abort();
                                 }
                             }

@@ -1,5 +1,5 @@
 "use strict";
-const helper_1 = require('./helper');
+const helper_1 = require("./helper");
 describe('Helper class', () => {
     let helper;
     beforeEach(() => {

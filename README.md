@@ -35,14 +35,15 @@ spa.static().then((html) =>{
 
 ### Option object (defaults)
 
-* `siteMapUrl`: '';
-* `singlePageUrl`: '';
-* `optimiseHtml`: false;
+* `siteMapUrl`: ''
+* `singlePageUrl`: ''
+* `optimiseHtml`: false
 * `optimiseHtmlOptions`: object
 * `inlineCss`: false
-* `domain`: 'mywebsite.com';
-* `width`:  375;
-* `height`: 667;
+* `domain`: 'mywebsite.com'
+* `width`:  375
+* `height`: 667
+* `whitelist`: []
 
 #### options.siteMapUrl
 Type: `string`  
@@ -88,6 +89,13 @@ Type: `string`
 Default value: `'mywebsite.com'`  
 
 This field is **REQUIRED**
+
+
+#### options.whitelist
+Type: `array`  
+Default value: `null`
+
+Whitelists external requests while rendering the page. By default all external requests are blocked 
 
 
 #### options.width
