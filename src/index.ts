@@ -12,6 +12,10 @@ const pageOptimiser = new PageOptimiser();
 
 class Spastatic {
   options: any = {
+    auth: <any>{
+      user: <string>null,
+      password: <string>null
+    },
     siteMapUrl: <string>null,
     singlePageUrl: <string>null,
     optimiseHtml: <boolean>false,
@@ -43,7 +47,6 @@ class Spastatic {
     console.info(`INFO: ${urlCount} pages to process.`);
 
     let batch = [];
-    let nInstances = Math.ceil(urlCount / 25);
     let workload = [];
 
     for (let i = 0; i < urlCount; i += 25) {
@@ -108,6 +111,13 @@ class Spastatic {
             const page = await instance.createPage();
             page.property('viewportSize', { width: this.options.width, height: this.options.height });
             page.property('resourceTimeout', 10000);
+
+            if (this.options.auth.user && this.options.auth.password) {
+              let hash = new Buffer(this.options.auth.user + ':' + this.options.auth.password).toString('base64');
+              page.property('customHeaders', {
+                'Authorization': 'Basic ' + hash
+              });
+            }
 
             console.info(`INFO: Processing: ${url} on instance ${instance.process.pid}`);
             const status = await page.open(url);

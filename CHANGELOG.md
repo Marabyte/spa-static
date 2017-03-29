@@ -1,3 +1,19 @@
+#  v1.1.2 (2017-03-28)
+
+### Features
+
+* Basic HTTP Auth
+
+### Bug Fixes
+
+* none
+
+### BREAKING CHANGES
+
+* none
+
+
+
 #  v1.1.1 (2017-03-28)
 
 ### Features
