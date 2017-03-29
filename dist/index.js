@@ -2,18 +2,18 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
+        step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
-const phantom = require("phantom");
-const os = require("os");
-const urlExtractor_1 = require("./lib/urlExtractor");
-const pageOptimiser_1 = require("./lib/pageOptimiser");
-const helper_1 = require("./lib/helper");
-const fs = require("fs");
-const mkpath = require("mkpath");
+const phantom = require('phantom');
+const os = require('os');
+const urlExtractor_1 = require('./lib/urlExtractor');
+const pageOptimiser_1 = require('./lib/pageOptimiser');
+const helper_1 = require('./lib/helper');
+const fs = require('fs');
+const mkpath = require('mkpath');
 const helper = new helper_1.default();
 const pageOptimiser = new pageOptimiser_1.default();
 class Spastatic {
@@ -38,7 +38,6 @@ class Spastatic {
         }
         Object.assign(this.options, options);
         this.options.whitelist.push(options.domain);
-        console.log(this.options);
     }
     initPhantom(urlList) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -97,6 +96,7 @@ class Spastatic {
                 };
                 for (let i = 0; i < workload.length; i++) {
                     let instance = yield phantom.create([
+                        '--ssl-protocol=any',
                         '--ignore-ssl-errors=yes',
                         '--load-images=no',
                         '--disk-cache=true'
@@ -104,9 +104,17 @@ class Spastatic {
                     yield Promise.all(workload[i].map((staticFile) => __awaiter(this, void 0, void 0, function* () {
                         const url = staticFile;
                         const page = yield instance.createPage();
-                        const content = yield page.property('content');
                         page.property('viewportSize', { width: this.options.width, height: this.options.height });
                         page.property('resourceTimeout', 10000);
+                        console.info(`INFO: Processing: ${url} on instance ${instance.process.pid}`);
+                        const status = yield page.open(url);
+                        if (status === 'fail') {
+                            htmlArr.urlsWithHtmlErrorsList.push(finalHtml.url);
+                        }
+                        console.info(`INFO: Page opened with status ${status}`);
+                        if (this.options.inlineCss === true) {
+                        }
+                        const content = yield page.property('content');
                         // onResourceRequested is serialised and runs inside Phantomjs' instance.
                         // Code is restricted to es5
                         yield page.on('onResourceRequested', true, function (requestData, networkRequest) {
@@ -116,14 +124,6 @@ class Spastatic {
                                 }
                             }
                         });
-                        console.info(`INFO: Processing: ${url} on instance ${instance.process.pid}`);
-                        const status = yield page.open(url);
-                        if (status === 'fail') {
-                            htmlArr.urlsWithHtmlErrorsList.push(finalHtml.url);
-                        }
-                        console.info(`INFO: Page opened with status ${status}`);
-                        if (this.options.inlineCss === true) {
-                        }
                         if (this.options.optimiseHtml === true) {
                             optimiseObj.pageUrl = staticFile;
                             optimiseObj.html = content;

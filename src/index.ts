@@ -34,8 +34,6 @@ class Spastatic {
 
     Object.assign(this.options, options);
     this.options.whitelist.push(options.domain);
-
-    console.log(this.options);
   }
 
   private async initPhantom(urlList) {
@@ -98,6 +96,7 @@ class Spastatic {
       };
       for (let i = 0; i < workload.length; i++) {
         let instance = await phantom.create([
+          '--ssl-protocol=any',
           '--ignore-ssl-errors=yes',
           '--load-images=no',
           '--disk-cache=true'
@@ -107,19 +106,8 @@ class Spastatic {
           workload[i].map(async (staticFile) => {
             const url = staticFile;
             const page = await instance.createPage();
-            const content = await page.property('content');
             page.property('viewportSize', { width: this.options.width, height: this.options.height });
             page.property('resourceTimeout', 10000);
-
-            // onResourceRequested is serialised and runs inside Phantomjs' instance.
-            // Code is restricted to es5
-            await page.on('onResourceRequested', true, function (requestData, networkRequest) {
-              for (var i = 0; i < this.options.whitelist.length; i++) {
-                if (requestData.url.indexOf(this.options.whitelist[i]) === -1) {
-                  networkRequest.abort();
-                }
-              }
-            });
 
             console.info(`INFO: Processing: ${url} on instance ${instance.process.pid}`);
             const status = await page.open(url);
@@ -132,6 +120,17 @@ class Spastatic {
 
             if (this.options.inlineCss === true) {
             }
+            const content = await page.property('content');
+
+            // onResourceRequested is serialised and runs inside Phantomjs' instance.
+            // Code is restricted to es5
+            await page.on('onResourceRequested', true, function (requestData, networkRequest) {
+              for (var i = 0; i < this.options.whitelist.length; i++) {
+                if (requestData.url.indexOf(this.options.whitelist[i]) === -1) {
+                  networkRequest.abort();
+                }
+              }
+            });
 
             if (this.options.optimiseHtml === true) {
               optimiseObj.pageUrl = staticFile;

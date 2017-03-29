@@ -1,9 +1,9 @@
 const fs = require('fs');
 const spastatic = require('../dist');
 const options = {
-  siteMapUrl: 'http://www.dkfindout.com/sitemap.xml',
-  // singlePageUrl: 'http://www.traveldk.com/article/an-architectural-tour-2016s-top-10-cities/',
-  optimiseHtml: true,
+  siteMapUrl: 'https://www.traveldk.com/sitemap.xml',
+  //singlePageUrl: 'http://www.traveldk.com/article/an-architectural-tour-2016s-top-10-cities/',
+  optimiseHtml: false,
   optimiseHtmlOptions: {
     removeAttributeQuotes: true,
     collapseWhitespace: true,
@@ -15,9 +15,9 @@ const options = {
     useShortDoctype: true
   },
   inlineCss: false,
-  domain: 'dkfindout.com',
+  domain: 'traveldk.com',
   whitelist: [
-    'opensolr.com'
+    'dkforeveryone.com'
   ]
 }
 const spa = new spastatic(options);
