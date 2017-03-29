@@ -1,3 +1,19 @@
+#  v1.1.1 (2017-03-28)
+
+### Features
+
+* HTTPS friendly
+
+### Bug Fixes
+
+* none
+
+### BREAKING CHANGES
+
+* none
+
+
+
 #  v1.1.0 (2017-02-18)
 
 ### Features

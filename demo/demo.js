@@ -1,8 +1,8 @@
 const fs = require('fs');
 const spastatic = require('../dist');
 const options = {
-  siteMapUrl: 'https://www.traveldk.com/sitemap.xml',
-  //singlePageUrl: 'http://www.traveldk.com/article/an-architectural-tour-2016s-top-10-cities/',
+  //siteMapUrl: 'https://www.traveldk.com/sitemap.xml',
+  singlePageUrl: 'http://www.traveldk.com/article/an-architectural-tour-2016s-top-10-cities/',
   optimiseHtml: false,
   optimiseHtmlOptions: {
     removeAttributeQuotes: true,
