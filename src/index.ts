@@ -28,7 +28,7 @@ class Spastatic {
     screenshot: <boolean>false,
     whitelist: <string[]>[]
   };
-  path: string = path.join(__dirname, '/static/');
+  path: string = '/tmp/static/';
   constructor(options) {
     if (!options.siteMapUrl && !options.singlePageUrl) {
       throw new Error(`ERROR: Either 'siteMapUrl' or 'singlePageUrl' are required`);

@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const phantom = require("phantom");
 const os = require("os");
 const fs = require("fs");
-const path = require("path");
 const mkpath = require("mkpath");
 const urlExtractor_1 = require("./lib/urlExtractor");
 const pageOptimiser_1 = require("./lib/pageOptimiser");
@@ -35,7 +34,7 @@ class Spastatic {
             screenshot: false,
             whitelist: []
         };
-        this.path = path.join(__dirname, '/static/');
+        this.path = '/tmp/static/';
         if (!options.siteMapUrl && !options.singlePageUrl) {
             throw new Error(`ERROR: Either 'siteMapUrl' or 'singlePageUrl' are required`);
         }
