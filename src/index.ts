@@ -27,6 +27,7 @@ class Spastatic {
     screenshot: <boolean>false,
     whitelist: <string[]>[]
   };
+  path: string = './static/';
   constructor(options) {
     if (!options.siteMapUrl && !options.singlePageUrl) {
       throw new Error(`ERROR: Either 'siteMapUrl' or 'singlePageUrl' are required`);
@@ -70,7 +71,7 @@ class Spastatic {
         report.urlsWithHtmlErrors = report.urlsWithHtmlErrorsList.length;
         report.urlOk = report.staticUrls.length;
       }
-      fs.writeFile('static/report.json', JSON.stringify(report));
+      fs.writeFile(this.path + 'report.json', JSON.stringify(report));
       return report;
     });
   }
@@ -172,11 +173,11 @@ class Spastatic {
       if (!location.length) {
         location = '/';
       }
-      mkpath.sync('static/' + this.options.domain + location, '0700');
-      fs.writeFileSync('static/' + this.options.domain + location + 'index.html', html);
+      mkpath.sync(this.path + this.options.domain + location, '0700');
+      fs.writeFileSync(this.path + this.options.domain + location + 'index.html', html);
       if (this.options.screenshot) {
         let safeloc = encodeURIComponent(location);
-        await page.render('static/' + this.options.domain + '/screenshot/' + safeloc + 'index.png');
+        await page.render(this.path + this.options.domain + '/screenshot/' + safeloc + 'index.png');
       }
       return filePath;
     } catch (error) {
