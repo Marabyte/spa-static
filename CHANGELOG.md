@@ -1,3 +1,18 @@
+#  v1.1.3 (2017-03-30)
+
+### Features
+
+* none
+
+### Bug Fixes
+
+* 'Static' folder path is now relative to the project
+
+### BREAKING CHANGES
+
+* none
+
+
 #  v1.1.2 (2017-03-28)
 
 ### Features
