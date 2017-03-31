@@ -9,11 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const phantom = require("phantom");
 const os = require("os");
+const fs = require("fs");
+const path = require("path");
+const mkpath = require("mkpath");
 const urlExtractor_1 = require("./lib/urlExtractor");
 const pageOptimiser_1 = require("./lib/pageOptimiser");
 const helper_1 = require("./lib/helper");
-const fs = require("fs");
-const mkpath = require("mkpath");
 const helper = new helper_1.default();
 const pageOptimiser = new pageOptimiser_1.default();
 class Spastatic {
@@ -34,7 +35,7 @@ class Spastatic {
             screenshot: false,
             whitelist: []
         };
-        this.path = './static/';
+        this.path = path.join(__dirname, '/static/');
         if (!options.siteMapUrl && !options.singlePageUrl) {
             throw new Error(`ERROR: Either 'siteMapUrl' or 'singlePageUrl' are required`);
         }
@@ -158,6 +159,7 @@ class Spastatic {
     }
     writeToDisk(url, html, page) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(`saving in ${this.path}`);
             try {
                 let location = url.replace(/^.*\/\/[^\/]+/, '');
                 let filePath = this.options.domain + location + 'index.html';

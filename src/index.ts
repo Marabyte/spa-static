@@ -1,10 +1,11 @@
 import * as phantom from 'phantom';
 import * as os from 'os';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as mkpath from 'mkpath';
 import UrlExtractor from './lib/urlExtractor';
 import PageOptimiser from './lib/pageOptimiser';
 import Helper from './lib/helper';
-import * as fs from 'fs';
-import * as mkpath from 'mkpath';
 
 
 const helper = new Helper();
@@ -27,7 +28,7 @@ class Spastatic {
     screenshot: <boolean>false,
     whitelist: <string[]>[]
   };
-  path: string = './static/';
+  path: string = path.join(__dirname, '/static/');
   constructor(options) {
     if (!options.siteMapUrl && !options.singlePageUrl) {
       throw new Error(`ERROR: Either 'siteMapUrl' or 'singlePageUrl' are required`);
@@ -167,6 +168,7 @@ class Spastatic {
   }
 
   private async writeToDisk(url, html, page) {
+    console.log(`saving in ${this.path}`);
     try {
       let location = url.replace(/^.*\/\/[^\/]+/, '');
       let filePath = this.options.domain + location + 'index.html';
